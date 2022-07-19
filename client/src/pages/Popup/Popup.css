@@ -1,0 +1,27 @@
+.popup {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  text-align: center;
+  height: 100%;
+  padding: 10px;
+  background-color: #f3634a;
+}
+
+.popup-header {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(12px + 2vmin);
+  color: white;
+}
+
+.app-link {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
