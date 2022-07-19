@@ -1,0 +1,11 @@
+.starsContainer {
+    float: right;
+    width: 120px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.star {
+    width: 20px;
+    height: 20px;
+}
