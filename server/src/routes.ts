@@ -14,7 +14,7 @@ router.get('/vendor', async (req, res) => {
 });
 
 router.post('/vendor', async (req, res) => {
-    const { name, review, }
+    const { name, review } = req.body;
 });
 
 export default router;
