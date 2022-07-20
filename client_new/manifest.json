@@ -1,6 +1,7 @@
 {
     "name": "Fooda+",
     "manifest_version": 3,
+    "version": "0.0.1",
     "description": "A Chrome extension to leave reviews on Fooda",
     "background": {
       "service_worker": "background.bundle.js"
