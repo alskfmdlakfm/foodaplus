@@ -11,23 +11,19 @@ generator client {
 }
 
 model Vendor {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  name        String    @unique
-  badges      Json[]  @default([])
-  reviews     Review[]
-  rating      Float?
-  numReviews  Int?      @default(0)
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String   @unique
+  badges     Json[]   @default([])
+  reviews    String[] @default([])
+  rating     Float?
+  numReviews Int?     @default(0)
 }
 
 model Review {
-  id        String      @id @default(auto()) @map("_id") @db.ObjectId
-  comment   String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  comment   String?
   badge     String
-  createdAt DateTime    @default(now())
-  votes     Int         @default(0)
+  createdAt DateTime @default(now())
+  votes     Int      @default(0)
   rating    Float
-  Vendor    Vendor?     @relation(fields: [vendorId], references: [id])
-  vendorId  String?     @db.ObjectId
 }
-
-
