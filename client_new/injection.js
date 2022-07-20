@@ -1,9 +1,5 @@
-import fullStarSrc from '../../assets/img/full-star-48.png';
-import halfStarSrc from '../../assets/img/half-star-48.png';
 
-onLoad();
-
-function onLoad() {
+const onLoad = () => {
   const vendorTilesInfo = document.getElementsByClassName("myfooda-event__meta")
   for (let i = 0; i < vendorTilesInfo.length; i++) {
     const stars = document.createElement("div");
@@ -22,3 +18,5 @@ function onLoad() {
     vendorTilesInfo[i].appendChild(stars);
   }
 }
+
+onLoad();

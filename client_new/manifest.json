@@ -3,13 +3,6 @@
     "manifest_version": 3,
     "version": "0.0.1",
     "description": "A Chrome extension to leave reviews on Fooda",
-    "background": {
-      "service_worker": "background.bundle.js"
-    },
-    "action": {
-      "default_popup": "popup.html",
-      "default_icon": "icon-34.png"
-    },
     "icons": {
       "128": "icon-128.png"
     },
@@ -19,10 +12,10 @@
           "https://app.fooda.com/my?date*"
         ],
         "js": [
-          "contentScript.bundle.js"
+          "injection.js"
         ],
         "css": [
-          "content.styles.css"
+          "styles.css"
         ]
       },
       {
@@ -30,18 +23,17 @@
           "https://app.fooda.com/*/items"
         ],
         "js": [
-          "contentScript.bundle.js"
+          "injection.js"
         ],
         "css": [
-          "content.styles.css"
+          "styles.css"
         ]
       }
     ],
-    "devtools_page": "devtools.html",
     "web_accessible_resources": [
       {
         "resources": [
-          "content.styles.css",
+          "styles.css",
           "icon-128.png",
           "icon-34.png",
           "full-star-48.png",
