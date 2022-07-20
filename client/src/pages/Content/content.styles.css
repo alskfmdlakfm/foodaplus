@@ -3,9 +3,18 @@
     width: 120px;
     display: flex;
     justify-content: flex-end;
+    z-index: 100;
 }
 
 .star {
     width: 20px;
     height: 20px;
+}
+
+.popup {
+    width: 400px;
+    height: 600px;
+    color: white;
+    z-index: 101;
+    position: absolute;
 }

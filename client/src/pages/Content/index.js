@@ -1,6 +1,3 @@
-import fullStarSrc from '../../assets/img/full-star-48.png';
-import halfStarSrc from '../../assets/img/half-star-48.png';
-
 onLoad();
 
 function onLoad() {
@@ -20,5 +17,18 @@ function onLoad() {
     halfStar.src = chrome.runtime.getURL('assets/img/half-star-48.png');
     stars.appendChild(halfStar);
     vendorTilesInfo[i].appendChild(stars);
+
+    stars.addEventListener("click", openPopup);
   }
+}
+
+function openPopup(e) {
+    e.preventDefault();
+    const popup = document.createElement("div");
+    popup.className = "popup"
+    const vendors = document.getElementsByClassName('js-event-vendors');
+    if (vendors.length > 0) {
+        document.body.insertBefore(popup, document.body.firstChild);
+    }
+    console.log("opening popup");
 }
