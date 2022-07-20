@@ -2,20 +2,21 @@ import { Prisma, PrismaClient, Review, Vendor } from '@prisma/client'
 
 const prisma = new PrismaClient();
 
-module.exports.getVendor = async (name: string) => {
-    const result = await prisma.vendor.findUnique({
+
+export async function getVendor(name: string) {
+    const result = await prisma.vendor.findFirst({
         where: { name }
     });
     return result;
 }
 
-module.exports.pushVendor = async (newVendor: Vendor) => {
+export async function pushVendor (newVendor: Vendor){
     const vendor = await prisma.vendor.create({
         data: newVendor
     });
 }
 
-module.exports.writeReview = async (newReview: Review, vendorName: string) => {
+export async function writeReview (newReview: Review, vendorName: string) {
     const review = await prisma.review.create({ data: newReview });
     if (review){
         // TODO: make this work
@@ -30,7 +31,7 @@ module.exports.writeReview = async (newReview: Review, vendorName: string) => {
     }
 }
 
-module.exports.voteOnReview = async (review: Review, newVote: number) => {
+export async function voteOnReview (review: Review, newVote: number) {
     // TODO: make this work
     // await prisma.review.update({
     //     where: { id: review.id },
