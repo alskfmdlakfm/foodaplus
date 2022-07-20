@@ -1,16 +1,54 @@
 {
+    "name": "Fooda+",
     "manifest_version": 3,
-    "name": "FoodaPlus",
-    "description": "Adds Reviews to fooda!",
-    "version": "0.0.1",
+    "description": "A Chrome extension to leave reviews on Fooda",
+    "background": {
+      "service_worker": "background.bundle.js"
+    },
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": "icon-34.png"
+    },
+    "icons": {
+      "128": "icon-128.png"
+    },
     "content_scripts": [
-        {
-            "matches": ["<all_urls>"],
-            "js": ["injection.js"],
-            "run_at": "document_end"
-        }
+      {
+        "matches": [
+          "https://app.fooda.com/my?date*"
+        ],
+        "js": [
+          "contentScript.bundle.js"
+        ],
+        "css": [
+          "content.styles.css"
+        ]
+      },
+      {
+        "matches": [
+          "https://app.fooda.com/*/items"
+        ],
+        "js": [
+          "contentScript.bundle.js"
+        ],
+        "css": [
+          "content.styles.css"
+        ]
+      }
     ],
-    "host_permissions": [
-        "*"
+    "devtools_page": "devtools.html",
+    "web_accessible_resources": [
+      {
+        "resources": [
+          "content.styles.css",
+          "icon-128.png",
+          "icon-34.png",
+          "full-star-48.png",
+          "half-star-48.png",
+          "assets/img/full-star-48.png",
+          "assets/img/half-star-48.png"
+        ],
+        "matches": ["<all_urls>"]
+      }
     ]
-}
+  }
