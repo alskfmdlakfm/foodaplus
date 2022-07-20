@@ -21,20 +21,13 @@ model Vendor {
 
 model Review {
   id        String      @id @default(auto()) @map("_id") @db.ObjectId
-  comment   Comment?    @relation(fields: [commentId], references: [id])
+  comment   String
   badge     String
-  commentId String?     @db.ObjectId
   createdAt DateTime    @default(now())
   votes     Int         @default(0)
   rating    Float
   Vendor    Vendor?     @relation(fields: [vendorId], references: [id])
   vendorId  String?     @db.ObjectId
-}
-
-model Comment {
-  id     String       @id @default(auto()) @map("_id") @db.ObjectId
-  text   String
-  Review Review[]
 }
 
 
