@@ -54,6 +54,12 @@ const getVendorDivsWithNames = () => {
       continue;
     }
 
+    const isPopUp = Boolean(vendor.closest(".myfooda-event--popup"));
+
+    if (isPopUp) {
+      continue;
+    }
+
     vendorDivsWithNames.push([name, vendor])
   }
 
