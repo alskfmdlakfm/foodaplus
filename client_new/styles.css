@@ -10,3 +10,14 @@
     width: 20px;
     height: 20px;
 }
+
+.badgesContainer {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.badge {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 3px;
+}
