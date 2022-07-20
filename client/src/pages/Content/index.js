@@ -1,21 +1,24 @@
-console.log('Content script works!');
-console.log('Must reload extension for modifications to take effect.');
-
-const starImageSrc = "https://img.icons8.com/fluency/48/000000/star.png";
+import fullStarSrc from '../../assets/img/full-star-48.png';
+import halfStarSrc from '../../assets/img/half-star-48.png';
 
 onLoad();
 
 function onLoad() {
   const vendorTilesInfo = document.getElementsByClassName("myfooda-event__meta")
   for (let i = 0; i < vendorTilesInfo.length; i++) {
-    // add logic to retrieve number of stars from server and calculate stars to use
     const stars = document.createElement("div");
     stars.className = "starsContainer";
-    const star = document.createElement("img");
-    star.src = starImageSrc;
-    star.className = "star"
-    stars.appendChild(star);
+    // add logic to retrieve number of stars from server and calculate stars to use
+    for (let i = 0; i < 3; i++) {
+        const star = document.createElement("img");
+        star.className = "star"
+        star.src = chrome.runtime.getURL('assets/img/full-star-48.png');
+        stars.appendChild(star);
+    }
+    const halfStar = document.createElement("img");
+    halfStar.className = "star"
+    halfStar.src = chrome.runtime.getURL('assets/img/half-star-48.png');
+    stars.appendChild(halfStar);
     vendorTilesInfo[i].appendChild(stars);
   }
 }
-
