@@ -8,12 +8,12 @@ const onLoad = () => {
     for (let i = 0; i < 3; i++) {
         const star = document.createElement("img");
         star.className = "star"
-        star.src = chrome.runtime.getURL('assets/img/full-star-48.png');
+        star.src = chrome.runtime.getURL('full-star-48.png');
         stars.appendChild(star);
     }
     const halfStar = document.createElement("img");
     halfStar.className = "star"
-    halfStar.src = chrome.runtime.getURL('assets/img/half-star-48.png');
+    halfStar.src = chrome.runtime.getURL('half-star-48.png');
     stars.appendChild(halfStar);
     vendorTilesInfo[i].appendChild(stars);
   }
