@@ -138,11 +138,14 @@ const createBadge = (parent, title, count) => {
 }
 
 const loadBootstrap = () => {
-  const bootstrap = document.createElement("link");
-  bootstrap.href = "https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css";
-  bootstrap.rel = "stylesheet";
-  bootstrap.crossorigin = "anonymous";
-  document.head.appendChild(bootstrap);
+  new Promise((resolve => {
+    const bootstrap = document.createElement("link");
+    bootstrap.href = "https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css";
+    bootstrap.rel = "stylesheet";
+    bootstrap.crossorigin = "anonymous";
+    document.head.appendChild(bootstrap);
+    resolve();
+  }))
 }
 
 const goodBadges = new Set(["Arrives on time", "Good value", "Tastes good"]);
