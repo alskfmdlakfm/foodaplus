@@ -1,18 +1,20 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { urlencoded } from 'express';
+import router from './src/routes';
+import morgan from 'morgan';
 
 const app = express();
 const PORT: string = (process.env.PORT || "8080");
 
 
 // Routing
-app.get('/', (req, res) => {
-    res.json('OK');
-});
+// app.get('/', (req, res) => {
+//     res.json('OK');
+// });
 
-app.get('/today', (req, res) => {
-    
-});
+app.use(morgan('dev'));
+app.use(urlencoded({extended: true}));
+app.use('/', router);
 
 
 app.listen(PORT, () => {
