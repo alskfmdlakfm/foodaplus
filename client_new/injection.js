@@ -107,10 +107,10 @@ const getRating = (name) => {
       },
       // body: JSON.stringify("")
     });
-    if (response.status != 200) {
-      reject(response.status);
-    } else {
+    if (response.ok) {
       resolve(response.json());
+    } else {
+      reject(response.status);
     }
   });
 }
