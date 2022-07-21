@@ -2,7 +2,7 @@ const modalHTMLTemplate = `
 <a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
 <div class="receipt__header">
     <div class="receipt__title">{vendor_name}</div>
-    <div class="receipt__message">This vendor has {reivew_amount} reviews.</div>
+    <div class="receipt__message">This vendor has {review_amount} reviews.</div>
 </div>
 {badges}
 <div class="receipt__details">
@@ -13,7 +13,7 @@ const modalHTMLTemplate = `
 </div>
 <div class="receipt__body">
     <div class="receipt__body-label">Comments</div>
-    {reviews}
+    {comments}
 </div>
 `
 
@@ -27,7 +27,7 @@ const singleReviewHTMLTemplate = `
 </div>
 `
 
-let currentVendor;
+let currentVendorInformation;
 
 /**
  * Creates a div for the review modal
@@ -41,27 +41,58 @@ const openModal = (e) => {
   const reviewModal = create("div", "popup receipt__modal");
   
   const vars = {
-    badges: createBadgesForModal().outerHTML
+    vendor_name: currentVendorInformation.name,
+    review_amount: currentVendorInformation.rating,
+    badges: createBadgesFromList(currentVendorInformation.badges, false).outerHTML,
+    comments: createComments()
   }
+
+  console.log(vars)
 
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
   document.body.insertBefore(reviewModal, document.body.firstChild);
 }
 
 /**
- * Creates and returns the badges section for the modal
+ * Creates and returns the comments section for the modal
  * 
+ * @returns Raw HTML for comments
+ */
+const createComments = () => {
+  let comments = "";
+  for (let i = 0; i < currentVendorInformation.reviews.length; ++i) {
+    const review = currentVendorInformation.reviews[i];
+    const vars = {
+      review_text: review.text,
+      review_date: review.date,
+      review_badges: createBadgesFromList(review.badges, true).outerHTML
+    }
+    comments += parseHTML(singleReviewHTMLTemplate, vars)
+  }
+  return comments;
+}
+
+/**
+ * Creates and returns the badges section (maybe for comments too)
+ * 
+ * @param badges Expected to be an array with objects of form {text: string, amount: int}
  * @returns Div with badges
  */
-const createBadgesForModal = () => {
+const createBadgesFromList = (badges, is_review) => {
   // create ratings section
   const ratings = create("div", "receipt__details");
 
   // create badges
-  const badges = createChild(ratings, "div", "badgesContainer");
-  // add logic to get badges and create them dynamically
-  createBadge(badges, "Arrives on time", 4);
-  createBadge(badges, "Poor value", 10);
+  const badgesDiv = createChild(ratings, "div", "badgesContainer");
+  for (const badge of badges) {
+    if (is_review) {
+      createBadge(badgesDiv, badge, 1);
+    } else {
+      createBadge(badgesDiv, badge.text, badge.amount);
+    }
+  }
+  // createBadge(badges, "Arrives on time", 4);
+  // createBadge(badges, "Poor value", 10);
 
   return ratings;
 }
@@ -108,8 +139,8 @@ const putStars = () => {
         return;
       }
       const starsContainer = createStars(rating);
-      starsContainer.addEventListener('click', (e) => {
-        currentVendor = name;
+      starsContainer.addEventListener('click', async (e) => {
+        await loadVendorData(name);
         openModal(e);
       });
       vendor.appendChild(starsContainer);
@@ -161,12 +192,34 @@ const createBadge = (parent, title, count) => {
   }
   const newBadge = createChild(parent, "span", badgeClassName);
   newBadge.appendChild(document.createTextNode(title));
-  newBadge.appendChild(document.createTextNode(" (" + count + ")"));
+  if (count != 1) {
+    newBadge.appendChild(document.createTextNode(" (" + count + ")"));
+  }
   return newBadge;
 }
 
 const parseHTML = (string, values) => string.replace(/{(.*?)}/g, (match, offset) => values[offset]);
 
+const loadVendorData = (name) => {
+  return new Promise((resolve) => {
+    currentVendorInformation = {
+      name: name,
+      rating: 5,
+      badges: [
+        {text: "Arrives on time", amount: 24},
+        {text: "Poor value", amount: 2}
+      ],
+      reviews: [
+        {
+          text: "It was meh",
+          date: new Date(Date.now()).toISOString(),
+          badges: ["Arrives on time", "Poor value"]
+        }
+      ]
+    }
+    resolve();
+  });
+}
 
 // const loadBootstrap = () => {
 //   new Promise((resolve => {
