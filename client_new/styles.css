@@ -11,10 +11,13 @@
     height: 20px;
 }
 
-.popup {
-    width: 400px;
-    height: 600px;
-    color: white;
-    z-index: 101;
-    position: absolute;
+.badgesContainer {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.badge {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 3px;
 }

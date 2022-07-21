@@ -10,6 +10,7 @@
   "dependencies": {
     "@hot-loader/react-dom": "^17.0.2",
     "bootstrap": "^5.2.0",
+    "bootstrap-icons": "^1.9.1",
     "react": "^17.0.2",
     "react-bootstrap": "^2.4.0",
     "react-dom": "^17.0.2",
@@ -42,6 +43,7 @@
     "html-webpack-plugin": "^5.5.0",
     "node-sass": "^6.0.1",
     "prettier": "^2.5.1",
+    "react-error-overlay": "^6.0.9",
     "sass-loader": "^12.4.0",
     "source-map-loader": "^3.0.1",
     "style-loader": "^3.3.1",
