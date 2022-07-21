@@ -89,14 +89,14 @@ const getRating = (name) => {
   return new Promise(async (resolve, reject) => {
     const response = await fetch("http://localhost:8081/vendor?name=" + encodeURIComponent(name), {
       method: 'GET',
-      mode: 'no-cors',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
       // body: JSON.stringify("")
     });
+    console.log(response)
     if (response.ok) {
-      resolve(response.json());
+      resolve(await response.json());
     } else {
       reject(response.status);
     }
@@ -135,6 +135,7 @@ const putStarsOnVendorCards = () => {
 
   for (const [name, vendor] of vendorsWithName) {
     getRating(name).then((rating) => {
+      console.log(ratings)
       if (rating == 0) { // Load create review button
         const reviewButton = createReviewButton();
         reviewButton.addEventListener('click', async (e) => {
@@ -151,6 +152,7 @@ const putStarsOnVendorCards = () => {
         vendor.appendChild(starsContainer);
       }
     }).catch(e => {
+      console.log("TEST")
       // console.log(e)
     });
   }
