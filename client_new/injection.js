@@ -47,8 +47,6 @@ const openModal = (e) => {
     comments: createComments()
   }
 
-  console.log(vars)
-
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
   document.body.insertBefore(reviewModal, document.body.firstChild);
 }
