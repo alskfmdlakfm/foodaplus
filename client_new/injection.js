@@ -99,7 +99,6 @@ const createBadgesFromList = (badges, is_review) => {
 
 const getRating = (name) => {
   return new Promise(async (resolve, reject) => {
-    // 
     const response = await fetch("http://localhost:8080/vendor?name=" + encodeURIComponent(name), {
       method: 'GET',
       mode: 'no-cors',
@@ -109,7 +108,7 @@ const getRating = (name) => {
       // body: JSON.stringify("")
     });
     if (response.status != 200) {
-      reject(response.statusText);
+      reject(response.status);
     } else {
       resolve(response.json());
     }
@@ -157,7 +156,9 @@ const putStars = () => {
         openModal(e);
       });
       vendor.appendChild(starsContainer);
-    }).catch(e => {console.log(e)});
+    }).catch(e => {
+      // console.log(e)
+    });
   }
 }
 
