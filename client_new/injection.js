@@ -1,20 +1,23 @@
 const modalHTMLTemplate = `
-<a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
-<div class="receipt__header">
-    <div class="receipt__title">{vendor_name}</div>
-    <div class="receipt__message">This vendor has {review_amount} reviews.</div>
-</div>
-{badges}
-<div class="receipt__details">
-    <div class="receipt__location-section">
-        <div class="receipt__info-primary">Write a review</div>
-        // REVIEW WRITING THING HERE
+<div class="receipt__modal">
+    <a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
+    <div class="receipt__header">
+        <div class="receipt__title">{vendor_name}</div>
+        <div class="receipt__message">This vendor has {review_amount} reviews.</div>
+    </div>
+    {badges}
+    <div class="receipt__details">
+        <div class="receipt__location-section">
+            <div class="receipt__info-primary">Write a review</div>
+            // REVIEW WRITING THING HERE
+        </div>
+    </div>
+    <div class="receipt__details">
+        <div class="receipt__info-primary">Comments</div>
+        {comments}
     </div>
 </div>
-<div class="receipt__details">
-    <div class="receipt__info-primary">Comments</div>
-    {comments}
-</div>
+<div class="receipt__scrim"></div>
 `
 
 const singleReviewHTMLTemplate = `
@@ -37,7 +40,8 @@ const openModal = (e) => {
   e.preventDefault();
 
   // create modal object
-  const reviewModal = create("div", "popup receipt__modal");
+  const reviewModal = create("div", "receipt");
+  reviewModal.id = "js-receipt-modal"
   
   const vars = {
     vendor_name: currentVendorInformation.name,
