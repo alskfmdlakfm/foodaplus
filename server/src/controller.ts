@@ -1,12 +1,19 @@
 import { Badge, Prisma, PrismaClient, Review, Vendor } from '@prisma/client'
+import { NotFoundError } from '@prisma/client/runtime';
 
 const prisma = new PrismaClient();
 
 export async function getVendor(name: string) {
-    const result = await prisma.vendor.findFirstOrThrow({
-        where: { name }
-    });
-    return result;
+    var result;
+    try {
+        result = await prisma.vendor.findFirstOrThrow({
+            where: { name }
+        });
+        return result;
+    } catch (error: any) {
+        result = await pushVendor({ name, badges: []});
+        return result;
+    }
 }
 
 export async function getReviews(vendor: Vendor) {
@@ -19,8 +26,7 @@ export async function getReviews(vendor: Vendor) {
 }
 
 export async function pushVendor(newVendor: any){
-    // return false if the vendor currently exists
-    if (await prisma.vendor.findFirst({ where: { name: newVendor.name }})) return false;
+    if (await prisma.vendor.findFirst({ where: { name: newVendor.name }})) throw new Error("Vendor already exists.");
     const vendor = await prisma.vendor.create({
         data: newVendor
     });
@@ -30,13 +36,7 @@ export async function pushVendor(newVendor: any){
 export async function writeReview(newReview: any, vendorName: string) {
     if (!('rating' in newReview) || !('badge' in newReview)) throw new Error("Missing rating or badge.")
     const review = await prisma.review.create({ data: newReview });
-    var vendor: Vendor;
-    try {
-        vendor = await getVendor(vendorName);
-    } catch (err){
-        await pushVendor({ name: vendorName });
-        vendor = await getVendor(vendorName); 
-    }
+    var vendor: Vendor = await getVendor(vendorName);
     // update badges
     const badgeIndex = vendor.badges.findIndex(e => e.text === review.badge); // find if this exists
     const badge = badgeIndex >= 0 ? vendor.badges[badgeIndex] : { text: newReview.badge, count: 1 } as Badge

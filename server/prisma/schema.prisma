@@ -13,9 +13,9 @@ generator client {
 model Vendor {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   name       String   @unique
-  badges     Badge[]  
+  badges     Badge[]
   reviews    String[] @default([])
-  rating     Float?
+  rating     Float    @default(0.0)
   numReviews Int?     @default(0)
 }
 
