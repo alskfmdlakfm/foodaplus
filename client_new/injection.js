@@ -1,45 +1,69 @@
+const modalHTMLTemplate = `
+<a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
+<div class="receipt__header">
+    <div class="receipt__title">{vendor_name}</div>
+    <div class="receipt__message">This vendor has {reivew_amount} reviews.</div>
+</div>
+{badges}
+<div class="receipt__details">
+    <div class="receipt__location-section">
+        <div class="receipt__section-label">Write a review</div>
+        // REVIEW WRITING THING HERE
+    </div>
+</div>
+<div class="receipt__body">
+    <div class="receipt__body-label">Comments</div>
+    {reviews}
+</div>
+`
+
+const singleReviewHTMLTemplate = `
+<div class="receipt__item">
+    <div class="receipt__line-item">{review_text}</div>
+    <div class="receipt__custom">On {review_date}</div>
+    <div class="receipt__custom">{review_badges}</div>
+    <div class="receipt__custom">thumb up</div>
+    <div class="receipt__custom">thumb down</div>
+</div>
+`
+
+let currentVendor;
+
 /**
  * Creates a div for the review modal
  * 
  * @returns null
  */
 const openModal = (e) => {
-  console.log("OPEN THE MODAL")
   e.preventDefault();
 
   // create modal object
   const reviewModal = create("div", "popup receipt__modal");
-  const vendors = document.getElementsByClassName('js-event-vendors');
-  if (vendors.length > 0) {
-      document.body.insertBefore(reviewModal, document.body.firstChild);
+  
+  const vars = {
+    badges: createBadgesForModal().outerHTML
   }
 
-  // create exit button
-  createChild(reviewModal, "a", "receipt__close js-close ie-handler");
-
-  // create modal header
-  const header = createChild(reviewModal, "div", "receipt__title");
-  const headerText = document.createTextNode("Reviews");
-  header.appendChild(headerText);
-
-  loadRatingsOnModal(reviewModal);
+  reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
+  document.body.insertBefore(reviewModal, document.body.firstChild);
 }
 
 /**
- * Populates the review modal with ratings information
+ * Creates and returns the badges section for the modal
  * 
- * @param {object} reviewModal The modal to inject information to
- * @returns null
+ * @returns Div with badges
  */
-const loadRatingsOnModal = (reviewModal) => {
+const createBadgesForModal = () => {
   // create ratings section
-  const ratings = createChild(reviewModal, "div", "receipt__details");
+  const ratings = create("div", "receipt__details");
 
   // create badges
   const badges = createChild(ratings, "div", "badgesContainer");
   // add logic to get badges and create them dynamically
   createBadge(badges, "Arrives on time", 4);
   createBadge(badges, "Poor value", 10);
+
+  return ratings;
 }
 
 const getRating = (name) => {
@@ -84,7 +108,10 @@ const putStars = () => {
         return;
       }
       const starsContainer = createStars(rating);
-      starsContainer.addEventListener('click', openModal);
+      starsContainer.addEventListener('click', (e) => {
+        currentVendor = name;
+        openModal(e);
+      });
       vendor.appendChild(starsContainer);
     });
   }
@@ -137,6 +164,9 @@ const createBadge = (parent, title, count) => {
   newBadge.appendChild(document.createTextNode(" (" + count + ")"));
   return newBadge;
 }
+
+const parseHTML = (string, values) => string.replace(/{(.*?)}/g, (match, offset) => values[offset]);
+
 
 // const loadBootstrap = () => {
 //   new Promise((resolve => {
