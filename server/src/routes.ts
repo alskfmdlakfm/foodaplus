@@ -64,4 +64,17 @@ router.post('/review', async (req, res) => {
     }
 });
 
+router.put('/vote', async (req, res) => {
+    const { reviewId, vote } = req.body; 
+    if (vote !== 1 && vote !== -1){
+        res.sendStatus(400);
+    }
+    try {
+        const review = await voteOnReview(reviewId, vote);
+        res.status(200).json(review);
+    } catch (err: any) {
+        res.status(500).send(err.toString()); 
+    }
+})
+
 export default router;
