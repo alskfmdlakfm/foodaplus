@@ -85,21 +85,23 @@ const createBadgesFromList = (badges, is_review) => {
   return badgesDiv;
 }
 
-const getRating = (name) => {
-  return new Promise(async (resolve, reject) => {
-    const response = await fetch("http://localhost:8081/vendor?name=" + encodeURIComponent(name), {
+const getVendor = (name) => {
+  return new Promise((resolve, reject) => {
+    const response = fetch("http://localhost:8081/vendor?name=" + encodeURIComponent(name), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       // body: JSON.stringify("")
+    }).then(response => {
+      if (response.ok) {
+        resolve(response.json());
+      } else {
+        reject(response.status);
+      }
+    }).catch(e => {
+      reject(e);
     });
-    console.log(response)
-    if (response.ok) {
-      resolve(await response.json());
-    } else {
-      reject(response.status);
-    }
   });
 }
 
@@ -134,9 +136,9 @@ const putStarsOnVendorCards = () => {
   const vendorsWithName = getVendorDivsWithNames();
 
   for (const [name, vendor] of vendorsWithName) {
-    getRating(name).then((rating) => {
-      console.log(ratings)
-      if (rating == 0) { // Load create review button
+    getVendor(name).then((vendorDB) => {
+      console.log(vendorDB)
+      if (vendorDB.rating == 0) { // Load create review button
         const reviewButton = createReviewButton();
         reviewButton.addEventListener('click', async (e) => {
           await loadVendorData(name);
@@ -144,7 +146,7 @@ const putStarsOnVendorCards = () => {
         })
         vendor.appendChild(reviewButton);
       } else {
-        const starsContainer = createStars(rating);
+        const starsContainer = createStars(vendorDB.ratings);
         starsContainer.addEventListener('click', async (e) => {
           await loadVendorData(name);
           openModal(e);
@@ -152,8 +154,7 @@ const putStarsOnVendorCards = () => {
         vendor.appendChild(starsContainer);
       }
     }).catch(e => {
-      console.log("TEST")
-      // console.log(e)
+      console.log(e)
     });
   }
 }
