@@ -1,8 +1,8 @@
 .starsContainer {
     float: right;
-    width: 120px;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     z-index: 100;
 }
 
@@ -14,10 +14,31 @@
 .badgesContainer {
     display: flex;
     justify-content: flex-start;
+    padding: 1rem 0;
 }
 
 .badge {
     display: flex;
     justify-content: space-between;
     margin: 0 3px;
+}
+
+.modal_reviews_container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+}
+
+.modal_review_section {
+    margin: 0 5px;
+}
+
+#modal_review_stars .starsContainer{
+    float: left;
+    justify-content: flex-start;
+}
+
+.review_button {
+    float: right;
 }

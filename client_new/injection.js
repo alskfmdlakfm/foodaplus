@@ -2,32 +2,31 @@ const modalHTMLTemplate = `
 <a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
 <div class="receipt__header">
     <div class="receipt__title">{vendor_name}</div>
-    <div class="receipt__message">This vendor has {reivew_amount} reviews.</div>
+    <div class="modal_reviews_container">
+      <div class="receipt__message modal_review_section">{rating}</div>
+      <div class="receipt__message modal_review_section" id="modal_review_stars">{stars}</div>
+      <div class="receipt__message modal_review_section">{num_reviews} reviews</div>
+    </div>
+    {badges}
 </div>
-{badges}
 <div class="receipt__details">
     <div class="receipt__location-section">
-        <div class="receipt__section-label">Write a review</div>
-        // REVIEW WRITING THING HERE
+      
     </div>
 </div>
-<div class="receipt__body">
-    <div class="receipt__body-label">Comments</div>
-    {reviews}
-</div>
+
 `
 
 const singleReviewHTMLTemplate = `
 <div class="receipt__item">
     <div class="receipt__line-item">{review_text}</div>
     <div class="receipt__custom">On {review_date}</div>
-    <div class="receipt__custom">{review_badges}</div>
-    <div class="receipt__custom">thumb up</div>
-    <div class="receipt__custom">thumb down</div>
 </div>
 `
+{/* <div class="receipt__custom">thumb up</div>
+<div class="receipt__custom">thumb down</div> */}
 
-let currentVendor;
+let currentVendorInformation;
 
 /**
  * Creates a div for the review modal
@@ -38,10 +37,16 @@ const openModal = (e) => {
   e.preventDefault();
 
   // create modal object
-  const reviewModal = create("div", "popup receipt__modal");
+  const reviewModal = create("div", "receipt");
+  reviewModal.id = "js-receipt-modal"
   
   const vars = {
-    badges: createBadgesForModal().outerHTML
+    vendor_name: currentVendorInformation.name,
+    rating: currentVendorInformation.rating,
+    stars: createStars(currentVendorInformation.rating).outerHTML,
+    num_reviews: currentVendorInformation.numReviews,
+    badges: createBadgesFromList(currentVendorInformation.badges, false).outerHTML,
+    comments: loadComments()
   }
 
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
@@ -49,26 +54,52 @@ const openModal = (e) => {
 }
 
 /**
- * Creates and returns the badges section for the modal
+ * Creates and returns the comments section for the modal
  * 
+ * @returns Raw HTML for comments
+ */
+const loadComments = () => {
+  let comments = "";
+  for (let i = 0; i < currentVendorInformation.reviews.length; ++i) {
+    const review = currentVendorInformation.reviews[i];
+    const vars = {
+      review_text: review.text,
+      review_date: review.date,
+    }
+    comments += parseHTML(singleReviewHTMLTemplate, vars)
+  }
+  return comments;
+}
+
+/**
+ * Creates and returns the badges section (maybe for comments too)
+ * 
+ * @param badges Expected to be an array with objects of form {text: string, amount: int}
  * @returns Div with badges
  */
-const createBadgesForModal = () => {
-  // create ratings section
-  const ratings = create("div", "receipt__details");
-
-  // create badges
-  const badges = createChild(ratings, "div", "badgesContainer");
-  // add logic to get badges and create them dynamically
-  createBadge(badges, "Arrives on time", 4);
-  createBadge(badges, "Poor value", 10);
-
-  return ratings;
+const createBadgesFromList = (badges, is_review) => {
+  const badgesDiv = create("div", "badgesContainer");
+  for (const badge of badges) {
+    createBadge(badgesDiv, badge.text, badge.amount);
+  }
+  return badgesDiv;
 }
 
 const getRating = (name) => {
-  return new Promise((resolve) => {
-    resolve(Math.random() * 4)
+  return new Promise(async (resolve, reject) => {
+    const response = await fetch("http://localhost:8081/vendor?name=" + encodeURIComponent(name), {
+      method: 'GET',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      // body: JSON.stringify("")
+    });
+    if (response.ok) {
+      resolve(response.json());
+    } else {
+      reject(response.status);
+    }
   });
 }
 
@@ -99,20 +130,28 @@ const getVendorDivsWithNames = () => {
   return vendorDivsWithNames;
 }
 
-const putStars = () => {
+const putStarsOnVendorCards = () => {
   const vendorsWithName = getVendorDivsWithNames();
 
   for (const [name, vendor] of vendorsWithName) {
     getRating(name).then((rating) => {
-      if (rating == 0) { // Skip no ratings
-        return;
+      if (rating == 0) { // Load create review button
+        const reviewButton = createReviewButton();
+        reviewButton.addEventListener('click', async (e) => {
+          await loadVendorData(name);
+          openModal(e);
+        })
+        vendor.appendChild(reviewButton);
+      } else {
+        const starsContainer = createStars(rating);
+        starsContainer.addEventListener('click', async (e) => {
+          await loadVendorData(name);
+          openModal(e);
+        });
+        vendor.appendChild(starsContainer);
       }
-      const starsContainer = createStars(rating);
-      starsContainer.addEventListener('click', (e) => {
-        currentVendor = name;
-        openModal(e);
-      });
-      vendor.appendChild(starsContainer);
+    }).catch(e => {
+      // console.log(e)
     });
   }
 }
@@ -125,7 +164,6 @@ const putStars = () => {
  */
 const createStars = (numOfStars) => {
   const stars = create("div", "starsContainer");
-  // add logic to retrieve number of stars from server and calculate stars to use
   for (let i = 0; i < numOfStars; i++) {
       const star = createChild(stars, "img", "star");
       star.src = chrome.runtime.getURL('full-star-48.png');
@@ -135,6 +173,12 @@ const createStars = (numOfStars) => {
     halfStar.src = chrome.runtime.getURL('half-star-48.png');
   }
   return stars
+}
+
+const createReviewButton = () => {
+  const button = create("button", "review_button btn btn-secondary btn-sm");
+  button.appendChild(document.createTextNode("Write a review"));
+  return button;
 }
 
 // HELPER FUNCTIONS
@@ -161,30 +205,44 @@ const createBadge = (parent, title, count) => {
   }
   const newBadge = createChild(parent, "span", badgeClassName);
   newBadge.appendChild(document.createTextNode(title));
-  newBadge.appendChild(document.createTextNode(" (" + count + ")"));
+  if (count != 1) {
+    newBadge.appendChild(document.createTextNode(" (" + count + ")"));
+  }
   return newBadge;
 }
 
 const parseHTML = (string, values) => string.replace(/{(.*?)}/g, (match, offset) => values[offset]);
 
-
-// const loadBootstrap = () => {
-//   new Promise((resolve => {
-//     const bootstrap = document.createElement("link");
-//     bootstrap.href = "https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css";
-//     bootstrap.rel = "stylesheet";
-//     bootstrap.crossorigin = "anonymous";
-//     document.head.appendChild(bootstrap);
-//     resolve();
-//   }))
-// }
+const loadVendorData = (name) => {
+  return new Promise((resolve) => {
+    currentVendorInformation = {
+      name: name,
+      rating: 4.3,
+      numReviews: 21,
+      badges: [
+        {text: "Arrives on time", amount: 24},
+        {text: "Not enough food", amount: 2}
+      ],
+      reviews: [
+        {
+          text: "It was meh",
+          date: new Date(Date.now()).toLocaleString()
+        },
+        {
+          text: "It was very bad",
+          date: new Date(Date.now()).toLocaleString()
+        }
+      ]
+    }
+    resolve();
+  });
+}
 
 const goodBadges = new Set(["Arrives on time", "Good value", "Tastes good"]);
-const badBadges = new Set(["Arrives late", "Poor value", "Tastes bad"]);
+const badBadges = new Set(["Arrives late", "Not enough food", "Tastes bad"]);
 
 const loadFoodaPlus = () => {
-  // loadBootstrap();
-  putStars();
+  putStarsOnVendorCards();
 }
 
 loadFoodaPlus();
