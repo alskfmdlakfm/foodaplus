@@ -7,12 +7,12 @@ const modalHTMLTemplate = `
 {badges}
 <div class="receipt__details">
     <div class="receipt__location-section">
-        <div class="receipt__section-label">Write a review</div>
+        <div class="receipt__info-primary">Write a review</div>
         // REVIEW WRITING THING HERE
     </div>
 </div>
-<div class="receipt__body">
-    <div class="receipt__body-label">Comments</div>
+<div class="receipt__details">
+    <div class="receipt__info-primary">Comments</div>
     {comments}
 </div>
 `
@@ -21,11 +21,10 @@ const singleReviewHTMLTemplate = `
 <div class="receipt__item">
     <div class="receipt__line-item">{review_text}</div>
     <div class="receipt__custom">On {review_date}</div>
-    <div class="receipt__custom">{review_badges}</div>
-    <div class="receipt__custom">thumb up</div>
-    <div class="receipt__custom">thumb down</div>
 </div>
 `
+{/* <div class="receipt__custom">thumb up</div>
+<div class="receipt__custom">thumb down</div> */}
 
 let currentVendorInformation;
 
@@ -63,7 +62,6 @@ const createComments = () => {
     const vars = {
       review_text: review.text,
       review_date: review.date,
-      review_badges: createBadgesFromList(review.badges, true).outerHTML
     }
     comments += parseHTML(singleReviewHTMLTemplate, vars)
   }
@@ -210,8 +208,11 @@ const loadVendorData = (name) => {
       reviews: [
         {
           text: "It was meh",
-          date: new Date(Date.now()).toISOString(),
-          badges: ["Arrives on time", "Poor value"]
+          date: new Date(Date.now()).toLocaleString()
+        },
+        {
+          text: "It was very bad",
+          date: new Date(Date.now()).toLocaleString()
         }
       ]
     }
