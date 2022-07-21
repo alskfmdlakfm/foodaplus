@@ -2,35 +2,54 @@ import { Prisma, PrismaClient, Review, Vendor } from '@prisma/client'
 
 const prisma = new PrismaClient();
 
-module.exports.getVendor = async (name: string) => {
-    const result = await prisma.vendor.findUnique({
+export async function getVendor(name: string) {
+    const result = await prisma.vendor.findFirstOrThrow({
         where: { name }
     });
     return result;
 }
 
-module.exports.pushVendor = async (newVendor: Vendor) => {
+export async function getReviews(vendor: Vendor) {
+    return await Promise.all(vendor.reviews.map(async (id) => {
+        return await prisma.review.findUnique({
+            where: { id }})
+    }));
+}
+
+export async function pushVendor(newVendor: any){
+    // return false if the vendor currently exists
+    if (await prisma.vendor.findFirst({ where: { name: newVendor.name }})) return false;
     const vendor = await prisma.vendor.create({
         data: newVendor
     });
+    return vendor;
 }
 
-module.exports.writeReview = async (newReview: Review, vendorName: string) => {
+export async function writeReview(newReview: any, vendorName: string) {
+    if (!('rating' in newReview) || !('badge' in newReview)) throw new Error("Missing rating or badge.")
     const review = await prisma.review.create({ data: newReview });
-    if (review){
-        // TODO: make this work
-        // await prisma.vendor.update({
-        //     where: { name: vendorName },
-        //     data: {
-        //         reviews: {
-        //             push: review
-        //         }
-        //     }
-        // })
+    var vendor: Vendor;
+    try {
+        vendor = await getVendor(vendorName);
+    } catch (err){
+        await pushVendor({ name: vendorName });
+        vendor = await getVendor(vendorName); 
     }
+    const currentRating = (vendor.rating ?? 0);
+    const reviewAmount = (vendor.numReviews ?? 0);
+    const newRating = ((currentRating * reviewAmount) + newReview.rating)/ (reviewAmount + 1);
+    return await prisma.vendor.update({
+        where: {name:vendorName},
+        data: {
+            rating: newRating,
+            badges: ["lol todo"],
+            numReviews: reviewAmount + 1,
+            reviews: [...vendor.reviews, review.id]
+        }
+    });
 }
 
-module.exports.voteOnReview = async (review: Review, newVote: number) => {
+export async function voteOnReview(review: Review, newVote: number) {
     // TODO: make this work
     // await prisma.review.update({
     //     where: { id: review.id },
