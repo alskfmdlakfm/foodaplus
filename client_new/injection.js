@@ -98,8 +98,21 @@ const createBadgesFromList = (badges, is_review) => {
 }
 
 const getRating = (name) => {
-  return new Promise((resolve) => {
-    resolve(Math.random() * 4)
+  return new Promise(async (resolve, reject) => {
+    // 
+    const response = await fetch("http://localhost:8080/vendor?name=" + encodeURIComponent(name), {
+      method: 'GET',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      // body: JSON.stringify("")
+    });
+    if (response.status != 200) {
+      reject(response.statusText);
+    } else {
+      resolve(response.json());
+    }
   });
 }
 
@@ -144,7 +157,7 @@ const putStars = () => {
         openModal(e);
       });
       vendor.appendChild(starsContainer);
-    });
+    }).catch(e => {console.log(e)});
   }
 }
 
