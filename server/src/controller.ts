@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, Review, Vendor } from '@prisma/client'
+import { Badge, Prisma, PrismaClient, Review, Vendor } from '@prisma/client'
 
 const prisma = new PrismaClient();
 
@@ -38,9 +38,10 @@ export async function writeReview(newReview: any, vendorName: string) {
         vendor = await getVendor(vendorName); 
     }
     // update badges
-    const badges = vendor.badges;
-    newReview.t
-
+    const badgeIndex = vendor.badges.findIndex(e => e.text = review.badge); // find if this exists
+    const badge = badgeIndex >= 0 ? vendor.badges[badgeIndex] : { text: newReview.badge, count: 0 } as Badge
+    if (badgeIndex >= 0) ++badge.count;
+    const vendorBadges = badgeIndex >= 0 ? vendor.badges : [...vendor.badges, badge] // if it does then
     // adjust rating
     const currentRating = (vendor.rating ?? 0);
     const reviewAmount = (vendor.numReviews ?? 0);
@@ -49,7 +50,7 @@ export async function writeReview(newReview: any, vendorName: string) {
         where: {name:vendorName},
         data: {
             rating: newRating,
-            badges: ["lol todo"],
+            badges: vendorBadges,
             numReviews: reviewAmount + 1,
             reviews: [...vendor.reviews, review.id]
         }
