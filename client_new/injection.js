@@ -2,9 +2,13 @@ const modalHTMLTemplate = `
 <a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
 <div class="receipt__header">
     <div class="receipt__title">{vendor_name}</div>
-    <div class="receipt__message">This vendor has {review_amount} reviews.</div>
+    <div class="modal_reviews_container">
+      <div class="receipt__message modal_review_section">{rating}</div>
+      <div class="receipt__message modal_review_section" id="modal_review_stars">{stars}</div>
+      <div class="receipt__message modal_review_section">{num_reviews} reviews</div>
+    </div>
+    {badges}
 </div>
-{badges}
 <div class="receipt__details">
     <div class="receipt__location-section">
         <div class="receipt__section-label">Write a review</div>
@@ -42,7 +46,9 @@ const openModal = (e) => {
   
   const vars = {
     vendor_name: currentVendorInformation.name,
-    review_amount: currentVendorInformation.rating,
+    rating: currentVendorInformation.rating,
+    stars: createStars(currentVendorInformation.rating).outerHTML,
+    num_reviews: currentVendorInformation.numReviews,
     badges: createBadgesFromList(currentVendorInformation.badges, false).outerHTML,
     comments: createComments()
   }
@@ -79,11 +85,7 @@ const createComments = () => {
  * @returns Div with badges
  */
 const createBadgesFromList = (badges, is_review) => {
-  // create ratings section
-  const ratings = create("div", "receipt__details");
-
-  // create badges
-  const badgesDiv = createChild(ratings, "div", "badgesContainer");
+  const badgesDiv = create("div", "badgesContainer");
   for (const badge of badges) {
     if (is_review) {
       createBadge(badgesDiv, badge, 1);
@@ -91,10 +93,7 @@ const createBadgesFromList = (badges, is_review) => {
       createBadge(badgesDiv, badge.text, badge.amount);
     }
   }
-  // createBadge(badges, "Arrives on time", 4);
-  // createBadge(badges, "Poor value", 10);
-
-  return ratings;
+  return badgesDiv;
 }
 
 const getRating = (name) => {
@@ -130,7 +129,7 @@ const getVendorDivsWithNames = () => {
   return vendorDivsWithNames;
 }
 
-const putStars = () => {
+const putStarsOnVendorCards = () => {
   const vendorsWithName = getVendorDivsWithNames();
 
   for (const [name, vendor] of vendorsWithName) {
@@ -204,16 +203,17 @@ const loadVendorData = (name) => {
   return new Promise((resolve) => {
     currentVendorInformation = {
       name: name,
-      rating: 5,
+      rating: 4.3,
+      numReviews: 21,
       badges: [
         {text: "Arrives on time", amount: 24},
-        {text: "Poor value", amount: 2}
+        {text: "Not enough food", amount: 2}
       ],
       reviews: [
         {
           text: "It was meh",
           date: new Date(Date.now()).toISOString(),
-          badges: ["Arrives on time", "Poor value"]
+          badges: ["Arrives on time", "Tastes good"]
         }
       ]
     }
@@ -221,23 +221,11 @@ const loadVendorData = (name) => {
   });
 }
 
-// const loadBootstrap = () => {
-//   new Promise((resolve => {
-//     const bootstrap = document.createElement("link");
-//     bootstrap.href = "https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css";
-//     bootstrap.rel = "stylesheet";
-//     bootstrap.crossorigin = "anonymous";
-//     document.head.appendChild(bootstrap);
-//     resolve();
-//   }))
-// }
-
 const goodBadges = new Set(["Arrives on time", "Good value", "Tastes good"]);
-const badBadges = new Set(["Arrives late", "Poor value", "Tastes bad"]);
+const badBadges = new Set(["Arrives late", "Not enough food", "Tastes bad"]);
 
 const loadFoodaPlus = () => {
-  // loadBootstrap();
-  putStars();
+  putStarsOnVendorCards();
 }
 
 loadFoodaPlus();
