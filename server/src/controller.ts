@@ -49,13 +49,17 @@ export async function writeReview(newReview: any, vendorName: string) {
     });
 }
 
-export async function voteOnReview(review: Review, newVote: number) {
+export async function voteOnReview(reviewId: string, newVote: number) {
     // TODO: make this work
-    // await prisma.review.update({
-    //     where: { id: review.id },
-    //     data: {
-    //         vote: { increment: 1 }
-    //     }
-    // });
-    // return true;
+    const review = prisma.review.update({
+        where: {
+            id: reviewId
+        },
+        data: {
+            votes: {
+                increment: newVote
+            }
+        }
+    });
+    return review;
 }
