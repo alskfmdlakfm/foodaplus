@@ -1,20 +1,22 @@
 const modalHTMLTemplate = `
-<a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
-<div class="receipt__header">
-    <div class="receipt__title">{vendor_name}</div>
-    <div class="modal_reviews_container">
-      <div class="receipt__message modal_review_section">{rating}</div>
-      <div class="receipt__message modal_review_section" id="modal_review_stars">{stars}</div>
-      <div class="receipt__message modal_review_section">{num_reviews} reviews</div>
+<div class="receipt__modal">
+    <a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
+    <div class="receipt__header">
+        <div class="receipt__title">{vendor_name}</div>
+        <div class="modal_reviews_container">
+          <div class="receipt__message modal_review_section">{rating}</div>
+          <div class="receipt__message modal_review_section" id="modal_review_stars">{stars}</div>
+          <div class="receipt__message modal_review_section">{num_reviews} reviews</div>
+        </div>
+        {badges}
     </div>
-    {badges}
-</div>
-<div class="receipt__details">
-    <div class="receipt__location-section">
-      
+    <div class="receipt__details">
+        <div class="receipt__location-section">
+          
+        </div>
     </div>
 </div>
-
+<div class="receipt__scrim"></div>
 `
 
 const singleReviewHTMLTemplate = `
