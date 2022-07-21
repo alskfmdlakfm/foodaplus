@@ -10,10 +10,12 @@ export async function getVendor(name: string) {
 }
 
 export async function getReviews(vendor: Vendor) {
-    return await Promise.all(vendor.reviews.map(async (id) => {
+    const reviews =  await Promise.all(vendor.reviews.map(async (id) => {
         return await prisma.review.findUnique({
             where: { id }})
     }));
+    reviews.sort((a, b) => a && b ? (a.createdAt < b.createdAt) ? -1 : 1 : 0);
+    return reviews;
 }
 
 export async function pushVendor(newVendor: any){
@@ -35,6 +37,11 @@ export async function writeReview(newReview: any, vendorName: string) {
         await pushVendor({ name: vendorName });
         vendor = await getVendor(vendorName); 
     }
+    // update badges
+    const badges = vendor.badges;
+    newReview.t
+
+    // adjust rating
     const currentRating = (vendor.rating ?? 0);
     const reviewAmount = (vendor.numReviews ?? 0);
     const newRating = ((currentRating * reviewAmount) + newReview.rating)/ (reviewAmount + 1);
