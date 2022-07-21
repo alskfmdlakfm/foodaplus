@@ -38,8 +38,8 @@ export async function writeReview(newReview: any, vendorName: string) {
         vendor = await getVendor(vendorName); 
     }
     // update badges
-    const badgeIndex = vendor.badges.findIndex(e => e.text = review.badge); // find if this exists
-    const badge = badgeIndex >= 0 ? vendor.badges[badgeIndex] : { text: newReview.badge, count: 0 } as Badge
+    const badgeIndex = vendor.badges.findIndex(e => e.text === review.badge); // find if this exists
+    const badge = badgeIndex >= 0 ? vendor.badges[badgeIndex] : { text: newReview.badge, count: 1 } as Badge
     if (badgeIndex >= 0) ++badge.count;
     const vendorBadges = badgeIndex >= 0 ? vendor.badges : [...vendor.badges, badge] // if it does then
     // adjust rating
