@@ -6,12 +6,6 @@ import morgan from 'morgan';
 const app = express();
 const PORT: string = (process.env.PORT || "8080");
 
-
-// Routing
-// app.get('/', (req, res) => {
-//     res.json('OK');
-// });
-
 app.use(morgan('dev'));
 app.use(urlencoded({extended: true}));
 app.use('/', router);
