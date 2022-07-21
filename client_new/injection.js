@@ -46,7 +46,7 @@ const openModal = (e) => {
   const vars = {
     vendor_name: currentVendorInformation.name,
     review_amount: currentVendorInformation.rating,
-    badges: createBadgesFromList(currentVendorInformation.badges, false).outerHTML,
+    badges: createBadgesFromList(currentVendorInformation.badges).outerHTML,
     comments: createComments()
   }
 
@@ -78,21 +78,15 @@ const createComments = () => {
  * @param badges Expected to be an array with objects of form {text: string, amount: int}
  * @returns Div with badges
  */
-const createBadgesFromList = (badges, is_review) => {
+const createBadgesFromList = (badges) => {
   // create ratings section
   const ratings = create("div", "receipt__details");
 
   // create badges
   const badgesDiv = createChild(ratings, "div", "badgesContainer");
   for (const badge of badges) {
-    if (is_review) {
-      createBadge(badgesDiv, badge, 1);
-    } else {
-      createBadge(badgesDiv, badge.text, badge.amount);
-    }
+    createBadge(badgesDiv, badge.text, badge.amount);
   }
-  // createBadge(badges, "Arrives on time", 4);
-  // createBadge(badges, "Poor value", 10);
 
   return ratings;
 }
