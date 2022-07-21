@@ -41,7 +41,7 @@ export async function writeReview(newReview: any, vendorName: string) {
     const badgeIndex = vendor.badges.findIndex(e => e.text === review.badge); // find if this exists
     const badge = badgeIndex >= 0 ? vendor.badges[badgeIndex] : { text: newReview.badge, count: 1 } as Badge
     if (badgeIndex >= 0) ++badge.count;
-    const vendorBadges = badgeIndex >= 0 ? vendor.badges : [...vendor.badges, badge] // if it does then
+    const vendorBadges = badgeIndex >= 0 ? vendor.badges : [...vendor.badges, badge].sort((a,b) => a.count-b.count) // if it does then
     // adjust rating
     const currentRating = (vendor.rating ?? 0);
     const reviewAmount = (vendor.numReviews ?? 0);
