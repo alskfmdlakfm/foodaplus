@@ -1,20 +1,39 @@
 const modalHTMLTemplate = `
-<a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
-<div class="receipt__header">
-    <div class="receipt__title">{vendor_name}</div>
-    <div class="modal_reviews_container">
-      <div class="receipt__message modal_review_section">{rating}</div>
-      <div class="receipt__message modal_review_section" id="modal_review_stars">{stars}</div>
-      <div class="receipt__message modal_review_section">{num_reviews} reviews</div>
-    </div>
-    {badges}
+<div class="receipt__modal">
+  <a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
+  <div class="receipt__header">
+      <div class="receipt__title">{vendor_name}</div>
+      <div class="modal_reviews_container">
+        <div class="receipt__message modal_review_section">{rating}</div>
+        <div class="receipt__message modal_review_section" id="modal_review_stars">{stars}</div>
+        <div class="receipt__message modal_review_section">{num_reviews} reviews</div>
+      </div>
+      {badges}
+  </div>
+  <div class="receipt__details">
+      <div class="receipt__location-section">
+        {form}
+      </div>
+  </div>
 </div>
-<div class="receipt__details">
-    <div class="receipt__location-section">
-      
-    </div>
-</div>
+<div class="receipt__scrim"></div>
+`
 
+const reviewFormHTMLTemplate = `
+<form>
+  <div class="form-group d-flex flex-column mb-4">
+    <label for="starSlider">Select rating</label>
+    <input id="starSlider" type="range" min="1" max="5" step="1">
+  </div>
+  <div class="form-group d-flex flex-wrap">
+    <label for="badges">Describe your experience</label>
+    {badges}
+  </div>
+  <div class="form-group">
+    <label for="comment">Write a comment (optional)</label>
+    <textarea class="form-control" id="comment" rows="3"></textarea>
+  </div>
+</form>
 `
 
 const singleReviewHTMLTemplate = `
@@ -39,14 +58,23 @@ const openModal = (e) => {
   // create modal object
   const reviewModal = create("div", "receipt");
   reviewModal.id = "js-receipt-modal"
+
+  let badgeObjects = []
+  for (const badge of allBadges) {
+    badgeObjects.push({text: badge, amount: 0});
+  }
+  const reviewFormVars = {
+    badges: createBadgesFromList(badgeObjects).outerHTML,
+  }
   
   const vars = {
     vendor_name: currentVendorInformation.name,
     rating: currentVendorInformation.rating,
     stars: createStars(currentVendorInformation.rating).outerHTML,
     num_reviews: currentVendorInformation.numReviews,
-    badges: createBadgesFromList(currentVendorInformation.badges, false).outerHTML,
-    comments: loadComments()
+    badges: createBadgesFromList(currentVendorInformation.badges).outerHTML,
+    comments: loadComments(),
+    form: parseHTML(reviewFormHTMLTemplate, reviewFormVars)
   }
 
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
@@ -77,8 +105,8 @@ const loadComments = () => {
  * @param badges Expected to be an array with objects of form {text: string, amount: int}
  * @returns Div with badges
  */
-const createBadgesFromList = (badges, is_review) => {
-  const badgesDiv = create("div", "badgesContainer");
+const createBadgesFromList = (badges) => {
+  const badgesDiv = create("div", "badgesContainer d-flex flex-wrap");
   for (const badge of badges) {
     createBadge(badgesDiv, badge.text, badge.amount);
   }
@@ -134,25 +162,33 @@ const putStarsOnVendorCards = () => {
   const vendorsWithName = getVendorDivsWithNames();
 
   for (const [name, vendor] of vendorsWithName) {
-    getRating(name).then((rating) => {
-      if (rating == 0) { // Load create review button
-        const reviewButton = createReviewButton();
+
+    const reviewButton = createReviewButton();
         reviewButton.addEventListener('click', async (e) => {
           await loadVendorData(name);
           openModal(e);
         })
         vendor.appendChild(reviewButton);
-      } else {
-        const starsContainer = createStars(rating);
-        starsContainer.addEventListener('click', async (e) => {
-          await loadVendorData(name);
-          openModal(e);
-        });
-        vendor.appendChild(starsContainer);
-      }
-    }).catch(e => {
-      // console.log(e)
-    });
+
+    // getRating(name).then((rating) => {
+    //   if (rating == 0) { // Load create review button
+    //     const reviewButton = createReviewButton();
+    //     reviewButton.addEventListener('click', async (e) => {
+    //       await loadVendorData(name);
+    //       openModal(e);
+    //     })
+    //     vendor.appendChild(reviewButton);
+    //   } else {
+    //     const starsContainer = createStars(rating);
+    //     starsContainer.addEventListener('click', async (e) => {
+    //       await loadVendorData(name);
+    //       openModal(e);
+    //     });
+    //     vendor.appendChild(starsContainer);
+    //   }
+    // }).catch(e => {
+    //   // console.log(e)
+    // });
   }
 }
 
@@ -174,6 +210,8 @@ const createStars = (numOfStars) => {
   }
   return stars
 }
+
+
 
 const createReviewButton = () => {
   const button = create("button", "review_button btn btn-secondary btn-sm");
@@ -198,14 +236,22 @@ const createChild = (parent, type, className) => {
 
 const createBadge = (parent, title, count) => {
   var badgeClassName;
-  if (goodBadges.has(title)) {
+  if (count == 0) {
+    badgeClassName = "badge text-bg-light unclicked-badge";
+  } else if (goodBadges.has(title)) {
     badgeClassName = "badge text-bg-success";
   } else if (badBadges.has(title)) {
     badgeClassName = "badge text-bg-danger";
   }
   const newBadge = createChild(parent, "span", badgeClassName);
+  if (count == 0) {
+    newBadge.addEventListener('click', async (e) => {
+      newBadge.className = "text-bg-secondary clicked-badge";
+      console.log("badge clicked");
+    });
+  }
   newBadge.appendChild(document.createTextNode(title));
-  if (count != 1) {
+  if (count > 1) {
     newBadge.appendChild(document.createTextNode(" (" + count + ")"));
   }
   return newBadge;
@@ -240,6 +286,7 @@ const loadVendorData = (name) => {
 
 const goodBadges = new Set(["Arrives on time", "Good value", "Tastes good"]);
 const badBadges = new Set(["Arrives late", "Not enough food", "Tastes bad"]);
+const allBadges = new Set(["Arrives on time", "Arrives late", "Good value", "Not enough food", "Tastes good", "Tastes bad"]);
 
 const loadFoodaPlus = () => {
   putStarsOnVendorCards();
