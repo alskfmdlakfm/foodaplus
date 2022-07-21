@@ -15,21 +15,17 @@ const modalHTMLTemplate = `
         // REVIEW WRITING THING HERE
     </div>
 </div>
-<div class="receipt__body">
-    <div class="receipt__body-label">Comments</div>
-    {comments}
-</div>
+<div class="receipt__scrim"></div>
 `
 
 const singleReviewHTMLTemplate = `
 <div class="receipt__item">
     <div class="receipt__line-item">{review_text}</div>
     <div class="receipt__custom">On {review_date}</div>
-    <div class="receipt__custom">{review_badges}</div>
-    <div class="receipt__custom">thumb up</div>
-    <div class="receipt__custom">thumb down</div>
 </div>
 `
+{/* <div class="receipt__custom">thumb up</div>
+<div class="receipt__custom">thumb down</div> */}
 
 let currentVendorInformation;
 
@@ -42,7 +38,8 @@ const openModal = (e) => {
   e.preventDefault();
 
   // create modal object
-  const reviewModal = create("div", "popup receipt__modal");
+  const reviewModal = create("div", "receipt");
+  reviewModal.id = "js-receipt-modal"
   
   const vars = {
     vendor_name: currentVendorInformation.name,
@@ -52,8 +49,6 @@ const openModal = (e) => {
     badges: createBadgesFromList(currentVendorInformation.badges, false).outerHTML,
     comments: createComments()
   }
-
-  console.log(vars)
 
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
   document.body.insertBefore(reviewModal, document.body.firstChild);
@@ -71,7 +66,6 @@ const createComments = () => {
     const vars = {
       review_text: review.text,
       review_date: review.date,
-      review_badges: createBadgesFromList(review.badges, true).outerHTML
     }
     comments += parseHTML(singleReviewHTMLTemplate, vars)
   }
@@ -87,18 +81,26 @@ const createComments = () => {
 const createBadgesFromList = (badges, is_review) => {
   const badgesDiv = create("div", "badgesContainer");
   for (const badge of badges) {
-    if (is_review) {
-      createBadge(badgesDiv, badge, 1);
-    } else {
-      createBadge(badgesDiv, badge.text, badge.amount);
-    }
+    createBadge(badgesDiv, badge.text, badge.amount);
   }
   return badgesDiv;
 }
 
 const getRating = (name) => {
-  return new Promise((resolve) => {
-    resolve(Math.random() * 4)
+  return new Promise(async (resolve, reject) => {
+    const response = await fetch("http://localhost:8080/vendor?name=" + encodeURIComponent(name), {
+      method: 'GET',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      // body: JSON.stringify("")
+    });
+    if (response.ok) {
+      resolve(response.json());
+    } else {
+      reject(response.status);
+    }
   });
 }
 
@@ -143,6 +145,8 @@ const putStarsOnVendorCards = () => {
         openModal(e);
       });
       vendor.appendChild(starsContainer);
+    }).catch(e => {
+      // console.log(e)
     });
   }
 }
@@ -212,8 +216,11 @@ const loadVendorData = (name) => {
       reviews: [
         {
           text: "It was meh",
-          date: new Date(Date.now()).toISOString(),
-          badges: ["Arrives on time", "Tastes good"]
+          date: new Date(Date.now()).toLocaleString()
+        },
+        {
+          text: "It was very bad",
+          date: new Date(Date.now()).toLocaleString()
         }
       ]
     }

@@ -18,7 +18,7 @@ router.get('/vendor', async (req, res) => {
             rating: vendor.rating,
             numReviews: vendor.numReviews,
             badges: vendor.badges,
-            reviews: getReviews(vendor)
+            reviews: await getReviews(vendor)
         }
         res.json(vendorJson);
     } catch (err: any) {
@@ -63,5 +63,19 @@ router.post('/review', async (req, res) => {
         res.status(500).send(err.toString());
     }
 });
+
+router.put('/vote', async (req, res) => {
+    const { reviewId, vote } = req.body; 
+    if (vote != 1 && vote != -1){
+        res.sendStatus(400);
+        return;
+    }
+    try {
+        const review = await voteOnReview(reviewId, parseInt(vote));
+        res.status(200).json(review);
+    } catch (err: any) {
+        res.status(500).send(err.toString()); 
+    }
+})
 
 export default router;
