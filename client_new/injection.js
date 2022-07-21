@@ -11,11 +11,10 @@ const modalHTMLTemplate = `
 </div>
 <div class="receipt__details">
     <div class="receipt__location-section">
-        <div class="receipt__section-label">Write a review</div>
-        // REVIEW WRITING THING HERE
+      
     </div>
 </div>
-<div class="receipt__scrim"></div>
+
 `
 
 const singleReviewHTMLTemplate = `
@@ -47,7 +46,7 @@ const openModal = (e) => {
     stars: createStars(currentVendorInformation.rating).outerHTML,
     num_reviews: currentVendorInformation.numReviews,
     badges: createBadgesFromList(currentVendorInformation.badges, false).outerHTML,
-    comments: createComments()
+    comments: loadComments()
   }
 
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
@@ -59,7 +58,7 @@ const openModal = (e) => {
  * 
  * @returns Raw HTML for comments
  */
-const createComments = () => {
+const loadComments = () => {
   let comments = "";
   for (let i = 0; i < currentVendorInformation.reviews.length; ++i) {
     const review = currentVendorInformation.reviews[i];
@@ -88,7 +87,7 @@ const createBadgesFromList = (badges, is_review) => {
 
 const getRating = (name) => {
   return new Promise(async (resolve, reject) => {
-    const response = await fetch("http://localhost:8080/vendor?name=" + encodeURIComponent(name), {
+    const response = await fetch("http://localhost:8081/vendor?name=" + encodeURIComponent(name), {
       method: 'GET',
       mode: 'no-cors',
       headers: {
@@ -136,15 +135,21 @@ const putStarsOnVendorCards = () => {
 
   for (const [name, vendor] of vendorsWithName) {
     getRating(name).then((rating) => {
-      if (rating == 0) { // Skip no ratings
-        return;
+      if (rating == 0) { // Load create review button
+        const reviewButton = createReviewButton();
+        reviewButton.addEventListener('click', async (e) => {
+          await loadVendorData(name);
+          openModal(e);
+        })
+        vendor.appendChild(reviewButton);
+      } else {
+        const starsContainer = createStars(rating);
+        starsContainer.addEventListener('click', async (e) => {
+          await loadVendorData(name);
+          openModal(e);
+        });
+        vendor.appendChild(starsContainer);
       }
-      const starsContainer = createStars(rating);
-      starsContainer.addEventListener('click', async (e) => {
-        await loadVendorData(name);
-        openModal(e);
-      });
-      vendor.appendChild(starsContainer);
     }).catch(e => {
       // console.log(e)
     });
@@ -159,7 +164,6 @@ const putStarsOnVendorCards = () => {
  */
 const createStars = (numOfStars) => {
   const stars = create("div", "starsContainer");
-  // add logic to retrieve number of stars from server and calculate stars to use
   for (let i = 0; i < numOfStars; i++) {
       const star = createChild(stars, "img", "star");
       star.src = chrome.runtime.getURL('full-star-48.png');
@@ -169,6 +173,12 @@ const createStars = (numOfStars) => {
     halfStar.src = chrome.runtime.getURL('half-star-48.png');
   }
   return stars
+}
+
+const createReviewButton = () => {
+  const button = create("button", "review_button btn btn-secondary btn-sm");
+  button.appendChild(document.createTextNode("Write a review"));
+  return button;
 }
 
 // HELPER FUNCTIONS
