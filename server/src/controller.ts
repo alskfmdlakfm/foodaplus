@@ -63,7 +63,6 @@ export async function writeReview(newReview: any, vendorName: string) {
 }
 
 export async function voteOnReview(reviewId: string, newVote: number) {
-    // TODO: make this work
     const review = prisma.review.update({
         where: {
             id: reviewId
