@@ -3,10 +3,16 @@ import { Badge, Prisma, PrismaClient, Review, Vendor } from '@prisma/client'
 const prisma = new PrismaClient();
 
 export async function getVendor(name: string) {
-    const result = await prisma.vendor.findFirstOrThrow({
-        where: { name }
-    });
-    return result;
+    var result;
+    try {
+        result = await prisma.vendor.findFirstOrThrow({
+            where: { name }
+        });
+        return result;
+    } catch (error: any) {
+        result = await pushVendor({ name, badges: []});
+        return result;
+    }
 }
 
 export async function getReviews(vendor: Vendor) {
@@ -19,8 +25,7 @@ export async function getReviews(vendor: Vendor) {
 }
 
 export async function pushVendor(newVendor: any){
-    // return false if the vendor currently exists
-    if (await prisma.vendor.findFirst({ where: { name: newVendor.name }})) return false;
+    if (await prisma.vendor.findFirst({ where: { name: newVendor.name }})) throw new Error("Vendor already exists.");
     const vendor = await prisma.vendor.create({
         data: newVendor
     });
@@ -58,7 +63,6 @@ export async function writeReview(newReview: any, vendorName: string) {
 }
 
 export async function voteOnReview(reviewId: string, newVote: number) {
-    // TODO: make this work
     const review = prisma.review.update({
         where: {
             id: reviewId
