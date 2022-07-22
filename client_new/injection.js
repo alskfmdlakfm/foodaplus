@@ -57,7 +57,7 @@ const singleReviewHTMLTemplate = `
       {review_text}
     </div>
     <div class="receipt__custom">
-      On {review_date}
+      On {review_on} at {review_at} 
     </div>
 </div>
 `
@@ -185,7 +185,8 @@ const loadComments = () => {
     if (review.comment != null && review.comment != "") {
       const vars = {
         review_text: sanitize(review.comment),
-        review_date: review.createdAt.toLocaleString(), // TODO MAKE NICER
+        review_on: new Date(review.createdAt).toLocaleDateString('en-US'),
+        review_at: new Date(review.createdAt).toLocaleTimeString('en-US') // TODO MAKE NICER
       }
       comments += parseHTML(singleReviewHTMLTemplate, vars)
     }
