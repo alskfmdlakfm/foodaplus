@@ -1,9 +1,10 @@
 {
   "name": "foodaplus",
   "version": "1.0.0",
-  "description": "server for foodaplus",
+  "description": "foodaplus",
   "main": "index.js",
   "scripts": {
+    "heroku-postbuild": "npm ci --include=dev",
     "test": "nodemon index.ts",
     "start": "ts-node index.ts"
   },
