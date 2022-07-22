@@ -13,7 +13,7 @@ const modalHTMLTemplate = `
           {stars}
         </div>
         <div class="receipt__message modal_review_section">
-          {num_reviews} reviews
+          {num_reviews}
         </div>
       </div>
       {badges}
@@ -92,14 +92,15 @@ const openModal = (e) => {
     vendor_name: sanitize(currentVendorInformation.name),
     rating: Math.round(currentVendorInformation.rating * 10) / 10,
     stars: createStars(currentVendorInformation.rating).outerHTML,
-    num_reviews: currentVendorInformation.numReviews,
+    num_reviews: currentVendorInformation.numReviews + " reviews",
     badges: createBadgesFromList(currentVendorInformation.badges).outerHTML,
     comments: loadComments(),
     form: parseHTML(reviewFormHTMLTemplate, reviewFormVars),
   }
 
   if (vars.rating == 0) {
-    vars.rating = "";
+    vars.rating = "No reviews. Be the first to review";
+    vars.num_reviews = "";
   }
 
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
