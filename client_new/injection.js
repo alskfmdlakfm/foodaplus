@@ -121,7 +121,6 @@ const submitForm = (e, vendorName) => {
     badge: getCheckedBadges(),
     comment: comment
   }
-  console.log(request);
 
   return new Promise((resolve, reject) => {
     const response = fetch(URL + "review", {
@@ -170,8 +169,6 @@ const loadComments = () => {
         review_date: review.createdAt.toLocaleString(), // TODO MAKE NICER
       }
       comments += parseHTML(singleReviewHTMLTemplate, vars)
-      console.log(vars)
-      console.log(comments)
     }
   }
   return comments;
@@ -296,7 +293,6 @@ const putStarsOnVendorCards = () => {
 const createStars = (numOfStars) => {
   const stars = create("div", "starsContainer");
   for (let i = 0; i < numOfStars; i++) {
-      console.log("CREATE STAR")
       const star = createChild(stars, "img", "star");
       star.src = chrome.runtime.getURL('full-star-48.png');
   }
