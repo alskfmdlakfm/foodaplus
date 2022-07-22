@@ -4,6 +4,7 @@
   "description": "foodaplus",
   "main": "index.js",
   "scripts": {
+    "build": "npm ci --include=dev",
     "test": "nodemon index.ts",
     "start": "ts-node index.ts"
   },
