@@ -29,9 +29,12 @@ const reviewFormHTMLTemplate = `
     <label for="badges">Describe your experience</label>
     {badges}
   </div>
-  <div class="form-group">
+  <div class="form-group mb-4">
     <label for="comment">Write a comment (optional)</label>
-    <textarea class="form-control" id="comment" rows="3"></textarea>
+    <textarea id="comment" class="form-control" rows="3"></textarea>
+  </div>
+  <div class="form-group form-submit-button-container">
+    <button type="submit" id="form-submit-button" class="btn btn-primary">Submit</button>
   </div>
 </form>
 `
@@ -74,11 +77,57 @@ const openModal = (e) => {
     num_reviews: currentVendorInformation.numReviews,
     badges: createBadgesFromList(currentVendorInformation.badges).outerHTML,
     comments: loadComments(),
-    form: parseHTML(reviewFormHTMLTemplate, reviewFormVars)
+    form: parseHTML(reviewFormHTMLTemplate, reviewFormVars),
   }
 
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
   document.body.insertBefore(reviewModal, document.body.firstChild);
+
+  const submitButton = getID("form-submit-button");
+  submitButton.addEventListener('click', async (e) => {
+    await submitForm(currentVendorInformation.name);
+  })
+}
+
+const submitForm = (vendorName) => {a
+  const rating = getID("starSlider").value;
+  const comment = getID("comment").value;
+
+  const request = {
+    name: vendorName,
+    rating: rating,
+    badge: getCheckedBadges(),
+    comment: comment
+  }
+  console.log(request);
+
+  return new Promise((resolve, reject) => {
+    const response = fetch("http://localhost:8081/review" + encodeURIComponent(name), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      // body: JSON.stringify("")
+    }).then(response => {
+      if (response.ok) {
+        resolve(response.json());
+      } else {
+        reject(response.status);
+      }
+    }).catch(e => {
+      reject(e);
+    });
+  });
+}
+
+const getCheckedBadges = () => {
+  var checkedBadges = []
+  const badges = getClass("checkbox-badge");
+  for (badge in badges) {
+    if (badge.checked) {
+      checkedBadges.push(badge.name);
+    }
+  }
 }
 
 /**
@@ -113,6 +162,15 @@ const createBadgesFromList = (badges) => {
   return badgesDiv;
 }
 
+ const createCheckboxBadgesFromList = (badges) => {
+  const badgesDiv = create("div", "badgesContainer d-flex flex-wrap");
+  badgesDiv.id = "checkbox-badges";
+  for (const badge of badges) {
+    createCheckboxBadge(badgesDiv, badge.text);
+  }
+  return badgesDiv;
+}
+
 const getVendor = (name) => {
   return new Promise((resolve, reject) => {
     const response = fetch("http://localhost:8081/vendor?name=" + encodeURIComponent(name), {
@@ -134,7 +192,7 @@ const getVendor = (name) => {
 }
 
 const getVendorDivsWithNames = () => {
-  const vendors = document.getElementsByClassName("myfooda-event__meta");
+  const vendors = getClass("myfooda-event__meta");
   const vendorDivsWithNames = [];
 
   for (const vendor of vendors) {
@@ -206,8 +264,6 @@ const createStars = (numOfStars) => {
   return stars
 }
 
-
-
 const createReviewButton = () => {
   const button = create("button", "review_button btn btn-secondary btn-sm");
   button.appendChild(document.createTextNode("Write a review"));
@@ -222,6 +278,12 @@ const create = (type, className) => {
   return elem;
 }
 
+const createWithID = (type, id) => {
+  const elem = document.createElement(type);
+  elem.id = id;
+  return elem;
+}
+
 const createChild = (parent, type, className) => {
   const elem = document.createElement(type);
   elem.className = className;
@@ -229,26 +291,36 @@ const createChild = (parent, type, className) => {
   return elem;
 }
 
+const getID = (id) => {
+  return document.getElementById(id);
+}
+
+const getClass = (className) => {
+  return document.getElementsByClassName(className);
+}
+
 const createBadge = (parent, title, count) => {
   var badgeClassName;
-  if (count == 0) {
-    badgeClassName = "badge text-bg-light unclicked-badge";
-  } else if (goodBadges.has(title)) {
+  if (goodBadges.has(title)) {
     badgeClassName = "badge text-bg-success";
   } else if (badBadges.has(title)) {
     badgeClassName = "badge text-bg-danger";
   }
   const newBadge = createChild(parent, "span", badgeClassName);
-  if (count == 0) {
-    newBadge.addEventListener('click', async (e) => {
-      newBadge.className = "text-bg-secondary clicked-badge";
-      console.log("badge clicked");
-    });
-  }
   newBadge.appendChild(document.createTextNode(title));
   if (count > 1) {
     newBadge.appendChild(document.createTextNode(" (" + count + ")"));
   }
+  return newBadge;
+}
+
+const createCheckboxBadge = (parent, title) => {
+  const newBadge = createChild(parent, "input", "checkbox-badge");
+  newBadge.type = "checkbox";
+  newBadge.id = title;
+  newBadge.name = title;
+  const label = createChild(parent, "label", "badge checkbox-badge-label text-bg-light");
+  label.for = title;
   return newBadge;
 }
 
