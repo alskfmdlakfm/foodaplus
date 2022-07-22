@@ -98,6 +98,10 @@ const openModal = (e) => {
     form: parseHTML(reviewFormHTMLTemplate, reviewFormVars),
   }
 
+  if (vars.rating == 0) {
+    vars.rating = "";
+  }
+
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
   document.body.insertBefore(reviewModal, document.body.firstChild);
 
@@ -334,6 +338,11 @@ const createStars = (numOfStars) => {
 
 const createReviewButton = () => {
   const button = create("button", "review_button btn btn-secondary btn-sm");
+  button.style = `  
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  `;
   button.appendChild(document.createTextNode("Write a review"));
   return button;
 }
