@@ -33,7 +33,7 @@ export async function pushVendor(newVendor: any){
 }
 
 export async function writeReview(newReview: any, vendorName: string) {
-    if (!('rating' in newReview) || !('badge' in newReview)) throw new Error("Missing rating or badge.")
+    if (!('rating' in newReview) || !('badges' in newReview)) throw new Error("Missing rating or badge.")
     const review = await prisma.review.create({ data: newReview });
     var vendor: Vendor;
     try {
@@ -43,10 +43,15 @@ export async function writeReview(newReview: any, vendorName: string) {
         vendor = await getVendor(vendorName); 
     }
     // update badges
-    const badgeIndex = vendor.badges.findIndex(e => e.text === review.badge); // find if this exists
-    const badge = badgeIndex >= 0 ? vendor.badges[badgeIndex] : { text: newReview.badge, count: 1 } as Badge
-    if (badgeIndex >= 0) ++badge.count;
-    const vendorBadges = badgeIndex >= 0 ? vendor.badges : [...vendor.badges, badge].sort((a,b) => a.count-b.count) // if it does then
+    for(const review_badge of review.badges){
+        const badgeIndex = vendor.badges.findIndex(e => e.text === review_badge); // find if this exists
+        const badge = badgeIndex >= 0 ? vendor.badges[badgeIndex] : { text: review_badge, count: 1 } as Badge
+        if (badgeIndex >= 0)
+            ++badge.count;
+        else
+            vendor.badges.push(badge);
+    }
+    const vendorBadges = vendor.badges.sort((a,b) => a.count-b.count);
     // adjust rating
     const currentRating = (vendor.rating ?? 0);
     const reviewAmount = (vendor.numReviews ?? 0);

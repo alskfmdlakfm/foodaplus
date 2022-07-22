@@ -50,10 +50,10 @@ router.post('/vendor', async (req, res) => {
 });
 
 router.post('/review', async (req, res) => {
-    const { name, rating, badge, comment  } = req.body;
+    const { name, rating, badges, comment  } = req.body;
     const newReview = {
         rating: parseFloat(rating),
-        badge,
+        badges,
         comment
     };
     try {
