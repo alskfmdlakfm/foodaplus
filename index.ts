@@ -7,8 +7,8 @@ import cors from 'cors';
 const app = express();
 const PORT: string = (process.env.PORT || "8080");
 
-app.use(morgan('dev'));
 app.use(urlencoded({extended: true}));
+app.use(morgan('dev'));
 app.use(cors({ origin: '*' }));
 app.use('/', router);
 

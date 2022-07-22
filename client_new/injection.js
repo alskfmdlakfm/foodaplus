@@ -130,13 +130,22 @@ const submitForm = (e, vendorName) => {
     comment: comment
   }
 
+  const params = new URLSearchParams();
+  for (key in request){
+    if(Array.isArray(request[key])){
+      for(const elem of request[key]) params.append('badges', elem);
+    } else {
+      params.append(key, request[key]);
+    }
+  }
+
   return new Promise((resolve, reject) => {
     const response = fetch(URL + "review", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: new URLSearchParams(request)
+      body: params
     }).then(response => {
       if (response.ok) {
         resolve(response.json());
