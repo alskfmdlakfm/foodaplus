@@ -49,6 +49,7 @@ const singleReviewHTMLTemplate = `
 <div class="receipt__custom">thumb down</div> */}
 
 let currentVendorInformation;
+const URL = "http://localhost:8081/"
 
 /**
  * Creates a div for the review modal
@@ -106,7 +107,7 @@ const submitForm = (e, vendorName) => {
   console.log(request);
 
   return new Promise((resolve, reject) => {
-    const response = fetch("http://localhost:8081/review", {
+    const response = fetch(URL + "review", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -180,7 +181,7 @@ const createBadgesFromList = (badges) => {
 
 const getVendor = (name) => {
   return new Promise((resolve, reject) => {
-    const response = fetch("http://localhost:8081/vendor?name=" + encodeURIComponent(name), {
+    const response = fetch(URL + "vendor?name=" + encodeURIComponent(name), {
       method: 'GET',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
