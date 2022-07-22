@@ -35,7 +35,8 @@ const reviewFormHTMLTemplate = `
 <form>
   <div class="form-group d-flex flex-column mb-4">
     <label for="starSlider">Select rating</label>
-    <input id="starSlider" type="range" min="1" max="5" step="1">
+    <div id="star-rating-container">{stars}</div>
+    <input id="starSlider" type="range" min="1" max="5" step="1" value="1">
   </div>
   <div class="form-group d-flex flex-wrap">
     <label for="badges">Describe your experience</label>
@@ -86,6 +87,7 @@ const openModal = (e) => {
   }
   const reviewFormVars = {
     badges: createCheckboxBadgesFromList(badgeObjects).outerHTML,
+    stars: createStars(1).outerHTML
   }
   
   const vars = {
@@ -100,6 +102,17 @@ const openModal = (e) => {
 
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
   document.body.insertBefore(reviewModal, document.body.firstChild);
+
+  const starSlider = document.getElementById("starSlider");
+  starSlider.addEventListener('change', async (e) => {
+    const starsContainer = document.getElementById("star-rating-container").getElementsByClassName("starsContainer")[0];
+    if (starsContainer.childElementCount < starSlider.value) {
+      const star = createChild(starsContainer, "img", "star");
+      star.src = chrome.runtime.getURL('full-star-48.png');
+    } else if (starsContainer.childElementCount > starSlider.value) {
+      starsContainer.removeChild(starsContainer.lastChild);
+    }
+  });
 
   const submitButton = document.getElementById("form-submit-button");
   submitButton.addEventListener('click', async (e) => {
