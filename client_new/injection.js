@@ -126,7 +126,7 @@ const submitForm = (e, vendorName) => {
   const request = {
     name: vendorName,
     rating: rating,
-    badge: getCheckedBadges(),
+    badges: getCheckedBadges(),
     comment: comment
   }
 
@@ -378,31 +378,6 @@ const createCheckboxBadge = (parent, title) => {
 }
 
 const parseHTML = (string, values) => string.replace(/{(.*?)}/g, (match, offset) => values[offset]);
-
-const loadVendorData = (name) => {
-  return new Promise((resolve) => {
-    currentVendorInformation = {
-      name: name,
-      rating: 4.3,
-      numReviews: 21,
-      badges: [
-        {text: "Arrives on time", amount: 24},
-        {text: "Not enough food", amount: 2}
-      ],
-      reviews: [
-        {
-          text: "It was meh",
-          date: new Date(Date.now()).toLocaleString()
-        },
-        {
-          text: "It was very bad",
-          date: new Date(Date.now()).toLocaleString()
-        }
-      ]
-    }
-    resolve();
-  });
-}
 
 function sanitize(string) {
   const map = {
