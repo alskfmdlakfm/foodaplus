@@ -23,8 +23,8 @@ const modalHTMLTemplate = `
         {form}
       </div>
   </div>
-  <div class="receipt__body">
-    <div class="receipt__body-label">Comments</div>
+  <div class="receipt__details">
+      <div class="receipt__info-primary">Comments</div>
       {comments}
   </div>
 </div>
@@ -292,12 +292,15 @@ const putStarsOnVendorCards = () => {
  */
 const createStars = (numOfStars) => {
   const stars = create("div", "starsContainer");
-  for (let i = 0; i < numOfStars; i++) {
+  for (let i = 0; i < Math.floor(numOfStars); i++) {
+    console.log("CREATE STAR");
+    console.log(i + ":" + numOfStars);
       const star = createChild(stars, "img", "star");
       star.src = chrome.runtime.getURL('full-star-48.png');
   }
   if (numOfStars % 1 >= 0.5) {
     const halfStar = createChild(stars, "img", "star");
+    console.log("CREATE HALF STAR");
     halfStar.src = chrome.runtime.getURL('half-star-48.png');
   }
   return stars
