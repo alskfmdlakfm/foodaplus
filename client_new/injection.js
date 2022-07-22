@@ -111,10 +111,11 @@ const openModal = (e) => {
   const starSlider = document.getElementById("starSlider");
   starSlider.addEventListener('change', async (e) => {
     const starsContainer = document.getElementById("star-rating-container").getElementsByClassName("starsContainer")[0];
-    if (starsContainer.childElementCount < starSlider.value) {
+    while (starsContainer.childElementCount < starSlider.value) {
       const star = createChild(starsContainer, "img", "star");
       star.src = chrome.runtime.getURL('full-star-48.png');
-    } else if (starsContainer.childElementCount > starSlider.value) {
+    } 
+    while (starsContainer.childElementCount > starSlider.value) {
       starsContainer.removeChild(starsContainer.lastChild);
     }
   });
