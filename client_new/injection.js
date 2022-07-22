@@ -2,11 +2,19 @@ const modalHTMLTemplate = `
 <div class="receipt__modal">
   <a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
   <div class="receipt__header">
-      <div class="receipt__title">{vendor_name}</div>
+      <div class="receipt__title">
+        {vendor_name}
+      </div>
       <div class="modal_reviews_container">
-        <div class="receipt__message modal_review_section">{rating}</div>
-        <div class="receipt__message modal_review_section" id="modal_review_stars">{stars}</div>
-        <div class="receipt__message modal_review_section">{num_reviews} reviews</div>
+        <div class="receipt__message modal_review_section">
+          {rating}
+        </div>
+        <div class="receipt__message modal_review_section" id="modal_review_stars">
+          {stars}
+        </div>
+        <div class="receipt__message modal_review_section">
+          {num_reviews} reviews
+        </div>
       </div>
       {badges}
   </div>
@@ -14,6 +22,10 @@ const modalHTMLTemplate = `
       <div class="receipt__location-section">
         {form}
       </div>
+  </div>
+  <div class="receipt__body">
+    <div class="receipt__body-label">Comments</div>
+      {comments}
   </div>
 </div>
 <div class="receipt__scrim"></div>
@@ -41,14 +53,19 @@ const reviewFormHTMLTemplate = `
 
 const singleReviewHTMLTemplate = `
 <div class="receipt__item">
-    <div class="receipt__line-item">{review_text}</div>
-    <div class="receipt__custom">On {review_date}</div>
+    <div class="receipt__line-item">
+      {review_text}
+    </div>
+    <div class="receipt__custom">
+      On {review_date}
+    </div>
 </div>
 `
 {/* <div class="receipt__custom">thumb up</div>
 <div class="receipt__custom">thumb down</div> */}
 
 let currentVendorInformation;
+let vendorsInfo = [];
 const URL = "https://foodaplus.herokuapp.com/"
 
 /**
@@ -72,7 +89,7 @@ const openModal = (e) => {
   }
   
   const vars = {
-    vendor_name: currentVendorInformation.name,
+    vendor_name: sanitize(currentVendorInformation.name),
     rating: currentVendorInformation.rating,
     stars: createStars(currentVendorInformation.rating).outerHTML,
     num_reviews: currentVendorInformation.numReviews,
@@ -112,7 +129,7 @@ const submitForm = (e, vendorName) => {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: request
+      body: new URLSearchParams(request)
     }).then(response => {
       if (response.ok) {
         resolve(response.json());
@@ -147,11 +164,15 @@ const loadComments = () => {
   let comments = "";
   for (let i = 0; i < currentVendorInformation.reviews.length; ++i) {
     const review = currentVendorInformation.reviews[i];
-    const vars = {
-      review_text: review.text,
-      review_date: review.date,
+    if (review.comment != null && review.comment != "") {
+      const vars = {
+        review_text: sanitize(review.comment),
+        review_date: review.createdAt.toLocaleString(), // TODO MAKE NICER
+      }
+      comments += parseHTML(singleReviewHTMLTemplate, vars)
+      console.log(vars)
+      console.log(comments)
     }
-    comments += parseHTML(singleReviewHTMLTemplate, vars)
   }
   return comments;
 }
@@ -186,7 +207,6 @@ const getVendor = (name) => {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      // body: JSON.stringify("")
     }).then(response => {
       if (response.ok) {
         resolve(response.json());
@@ -232,17 +252,31 @@ const putStarsOnVendorCards = () => {
   for (const [name, vendor] of vendorsWithName) {
     getVendor(name).then((vendorDB) => {
       console.log(vendorDB)
-      if (vendorDB.rating == 0) { // Load create review button
+      if (vendorDB.rating == 0) {
+        vendorsInfo[name] = {
+          name: vendorDB.name,
+          rating: 0,
+          numReviews: 0,
+          badges: [],
+          reviews: []
+        }
         const reviewButton = createReviewButton();
         reviewButton.addEventListener('click', async (e) => {
-          await loadVendorData(name);
+        currentVendorInformation = vendorsInfo[name]
           openModal(e);
         })
         vendor.appendChild(reviewButton);
       } else {
-        const starsContainer = createStars(vendorDB.ratings);
+        vendorsInfo[name] = {
+          name: vendorDB.name,
+          rating: vendorDB.rating,
+          numReviews: vendorDB.reviews.length,
+          badges: vendorDB.badges,
+          reviews: vendorDB.reviews
+        }
+        const starsContainer = createStars(vendorDB.rating);
         starsContainer.addEventListener('click', async (e) => {
-          await loadVendorData(name);
+          currentVendorInformation = vendorsInfo[name];
           openModal(e);
         });
         vendor.appendChild(starsContainer);
@@ -262,6 +296,7 @@ const putStarsOnVendorCards = () => {
 const createStars = (numOfStars) => {
   const stars = create("div", "starsContainer");
   for (let i = 0; i < numOfStars; i++) {
+      console.log("CREATE STAR")
       const star = createChild(stars, "img", "star");
       star.src = chrome.runtime.getURL('full-star-48.png');
   }
@@ -351,6 +386,19 @@ const loadVendorData = (name) => {
     }
     resolve();
   });
+}
+
+function sanitize(string) {
+  const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      "/": '&#x2F;',
+  };
+  const reg = /[&<>"'/]/ig;
+  return string.replace(reg, (match)=>(map[match]));
 }
 
 const goodBadges = new Set(["Arrives on time", "Good value", "Tastes good"]);
