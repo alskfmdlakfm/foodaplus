@@ -90,7 +90,7 @@ const openModal = (e) => {
   
   const vars = {
     vendor_name: sanitize(currentVendorInformation.name),
-    rating: currentVendorInformation.rating,
+    rating: Math.round(currentVendorInformation.rating * 10) / 10,
     stars: createStars(currentVendorInformation.rating).outerHTML,
     num_reviews: currentVendorInformation.numReviews,
     badges: createBadgesFromList(currentVendorInformation.badges).outerHTML,
