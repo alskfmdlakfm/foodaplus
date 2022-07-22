@@ -13,6 +13,7 @@ router.get('/vendor', async (req, res) => {
     }
     try {
         const vendor = await getVendor(vendorName);
+        console.log("cope")
         const vendorJson = {
             name: vendor.name,
             rating: vendor.rating,
