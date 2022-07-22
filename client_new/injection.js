@@ -149,7 +149,7 @@ const submitForm = (e, vendorName) => {
           rating: ((c.rating * c.numReviews) + rating) / (c.numReviews + 1),
           numReviews: c.numReviews + 1,
           badges: [],
-          reviews: [...c.reviews, {...request, createAt: new Date(Date.now())}]
+          reviews: [{...request, createdAt: new Date(Date.now())}, ...c.reviews]
         }
 
       } else {
@@ -289,7 +289,7 @@ const putStarsOnVendorCards = () => {
           rating: vendorDB.rating,
           numReviews: vendorDB.reviews.length,
           badges: vendorDB.badges,
-          reviews: vendorDB.reviews
+          reviews: vendorDB.reviews.sort((a, b) =>  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         }
         const starsContainer = createStars(vendorDB.rating);
         starsContainer.addEventListener('click', async (e) => {
