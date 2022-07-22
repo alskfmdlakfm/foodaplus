@@ -146,10 +146,10 @@ const submitForm = (e, vendorName) => {
 
         vendorsInfo[vendorName] = {
           name: vendorName,
-          rating: ((c.rating * c.numReviews) + rating) / (c.numReviews + 1),
+          rating: ((c.rating * c.numReviews) + parseFloat(rating)) / (c.numReviews + 1),
           numReviews: c.numReviews + 1,
-          badges: [],
-          reviews: [{...request, createdAt: new Date(Date.now())}, ...c.reviews]
+          badges: c.badges,
+          reviews: [{...request, createdAt: new Date(Date.now())}, ...c.reviews],
         }
 
       } else {
@@ -186,7 +186,7 @@ const loadComments = () => {
       const vars = {
         review_text: sanitize(review.comment),
         review_on: new Date(review.createdAt).toLocaleDateString('en-US'),
-        review_at: new Date(review.createdAt).toLocaleTimeString('en-US') // TODO MAKE NICER
+        review_at: new Date(review.createdAt).toLocaleTimeString('en-US')
       }
       comments += parseHTML(singleReviewHTMLTemplate, vars)
     }
