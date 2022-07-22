@@ -17,7 +17,7 @@ router.get('/vendor', async (req, res) => {
             name: vendor.name,
             rating: vendor.rating,
             numReviews: vendor.numReviews,
-            badges: vendor.badges,
+            badges: vendor.badges.sort((a,b) => b.count - a.count).slice(0,3),
             reviews: await getReviews(vendor)
         }
         res.json(vendorJson);
