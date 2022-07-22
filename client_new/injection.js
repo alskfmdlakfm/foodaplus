@@ -1,6 +1,6 @@
 const modalHTMLTemplate = `
 <div class="receipt__modal">
-  <a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
+  <a href="#" class="receipt__close js-close ie-handler" id="close-modal-x"></a>
   <div class="receipt__header">
       <div class="receipt__title">
         {vendor_name}
@@ -13,7 +13,7 @@ const modalHTMLTemplate = `
           {stars}
         </div>
         <div class="receipt__message modal_review_section">
-          {num_reviews} reviews
+          {num_reviews}
         </div>
       </div>
       {badges}
@@ -58,7 +58,7 @@ const singleReviewHTMLTemplate = `
       {review_text}
     </div>
     <div class="receipt__custom">
-      On {review_date}
+      On {review_on} at {review_at} 
     </div>
 </div>
 `
@@ -79,7 +79,7 @@ const openModal = (e) => {
 
   // create modal object
   const reviewModal = create("div", "receipt");
-  reviewModal.id = "js-receipt-modal"
+  reviewModal.id = "review-modal"
 
   let badgeObjects = []
   for (const badge of allBadges) {
@@ -94,10 +94,15 @@ const openModal = (e) => {
     vendor_name: sanitize(currentVendorInformation.name),
     rating: Math.round(currentVendorInformation.rating * 10) / 10,
     stars: createStars(currentVendorInformation.rating).outerHTML,
-    num_reviews: currentVendorInformation.numReviews,
+    num_reviews: currentVendorInformation.numReviews + " reviews",
     badges: createBadgesFromList(currentVendorInformation.badges).outerHTML,
     comments: loadComments(),
     form: parseHTML(reviewFormHTMLTemplate, reviewFormVars),
+  }
+
+  if (vars.rating == 0) {
+    vars.rating = "No reviews. Be the first to review";
+    vars.num_reviews = "";
   }
 
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
@@ -113,6 +118,7 @@ const openModal = (e) => {
       starsContainer.removeChild(starsContainer.lastChild);
     }
   });
+  const modal = document.getElementById("review-modal");
 
   const submitButton = document.getElementById("form-submit-button");
   submitButton.addEventListener('click', async (e) => {
@@ -120,6 +126,12 @@ const openModal = (e) => {
       .catch(e => {
         console.log(e)
       });
+      modal.remove();
+  });
+
+  const exitButton = document.getElementById("close-modal-x");
+  exitButton.addEventListener('click', async (e) => {
+      modal.remove();
   });
 }
 
@@ -131,8 +143,17 @@ const submitForm = (e, vendorName) => {
   const request = {
     name: vendorName,
     rating: rating,
-    badge: getCheckedBadges(),
+    badges: getCheckedBadges(),
     comment: comment
+  }
+
+  const params = new URLSearchParams();
+  for (key in request){
+    if(Array.isArray(request[key])){
+      for(const elem of request[key]) params.append('badges', elem);
+    } else {
+      params.append(key, request[key]);
+    }
   }
 
   return new Promise((resolve, reject) => {
@@ -141,11 +162,22 @@ const submitForm = (e, vendorName) => {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      body: new URLSearchParams(request)
+      body: params
     }).then(response => {
       if (response.ok) {
         resolve(response.json());
         console.log("response ok");
+
+        const c = vendorsInfo[vendorName];
+
+        vendorsInfo[vendorName] = {
+          name: vendorName,
+          rating: ((c.rating * c.numReviews) + parseFloat(rating)) / (c.numReviews + 1),
+          numReviews: c.numReviews + 1,
+          badges: c.badges,
+          reviews: [{...request, createdAt: new Date(Date.now())}, ...c.reviews],
+        }
+
       } else {
         reject(response.status);
       }
@@ -179,7 +211,8 @@ const loadComments = () => {
     if (review.comment != null && review.comment != "") {
       const vars = {
         review_text: sanitize(review.comment),
-        review_date: review.createdAt.toLocaleString(), // TODO MAKE NICER
+        review_on: new Date(review.createdAt).toLocaleDateString('en-US'),
+        review_at: new Date(review.createdAt).toLocaleTimeString('en-US')
       }
       comments += parseHTML(singleReviewHTMLTemplate, vars)
     }
@@ -282,7 +315,7 @@ const putStarsOnVendorCards = () => {
           rating: vendorDB.rating,
           numReviews: vendorDB.reviews.length,
           badges: vendorDB.badges,
-          reviews: vendorDB.reviews
+          reviews: vendorDB.reviews.sort((a, b) =>  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         }
         const starsContainer = createStars(vendorDB.rating);
         starsContainer.addEventListener('click', async (e) => {
@@ -306,14 +339,11 @@ const putStarsOnVendorCards = () => {
 const createStars = (numOfStars) => {
   const stars = create("div", "starsContainer");
   for (let i = 0; i < Math.floor(numOfStars); i++) {
-    console.log("CREATE STAR");
-    console.log(i + ":" + numOfStars);
       const star = createChild(stars, "img", "star");
       star.src = chrome.runtime.getURL('full-star-48.png');
   }
   if (numOfStars % 1 >= 0.5) {
     const halfStar = createChild(stars, "img", "star");
-    console.log("CREATE HALF STAR");
     halfStar.src = chrome.runtime.getURL('half-star-48.png');
   }
   return stars
@@ -321,6 +351,11 @@ const createStars = (numOfStars) => {
 
 const createReviewButton = () => {
   const button = create("button", "review_button btn btn-secondary btn-sm");
+  button.style = `  
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  `;
   button.appendChild(document.createTextNode("Write a review"));
   return button;
 }
@@ -374,31 +409,6 @@ const createCheckboxBadge = (parent, title) => {
 }
 
 const parseHTML = (string, values) => string.replace(/{(.*?)}/g, (match, offset) => values[offset]);
-
-const loadVendorData = (name) => {
-  return new Promise((resolve) => {
-    currentVendorInformation = {
-      name: name,
-      rating: 4.3,
-      numReviews: 21,
-      badges: [
-        {text: "Arrives on time", amount: 24},
-        {text: "Not enough food", amount: 2}
-      ],
-      reviews: [
-        {
-          text: "It was meh",
-          date: new Date(Date.now()).toLocaleString()
-        },
-        {
-          text: "It was very bad",
-          date: new Date(Date.now()).toLocaleString()
-        }
-      ]
-    }
-    resolve();
-  });
-}
 
 function sanitize(string) {
   const map = {
