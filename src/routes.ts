@@ -7,7 +7,6 @@ const router = express.Router();
 //usage: /vendor?name=<insert name here>
 router.get('/vendor', async (req, res) => {
     const vendorName = req.query.name?.toString();
-    console.log(vendorName);
     if (!vendorName){
         res.sendStatus(500);
         return;
