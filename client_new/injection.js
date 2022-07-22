@@ -339,6 +339,11 @@ const putStarsOnVendorCards = () => {
  */
 const createStars = (numOfStars) => {
   const stars = create("div", "starsContainer");
+  stars.style = `
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  `;
   for (let i = 0; i < Math.floor(numOfStars); i++) {
       const star = createChild(stars, "img", "star");
       star.src = chrome.runtime.getURL('full-star-48.png');
