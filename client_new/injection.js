@@ -1,6 +1,6 @@
 const modalHTMLTemplate = `
 <div class="receipt__modal">
-  <a href="#" class="receipt__close js-close ie-handler" data-target="#js-receipt-modal"></a>
+  <a href="#" class="receipt__close js-close ie-handler" id="close-modal-x"></a>
   <div class="receipt__header">
       <div class="receipt__title">
         {vendor_name}
@@ -78,7 +78,7 @@ const openModal = (e) => {
 
   // create modal object
   const reviewModal = create("div", "receipt");
-  reviewModal.id = "js-receipt-modal"
+  reviewModal.id = "review-modal"
 
   let badgeObjects = []
   for (const badge of allBadges) {
@@ -101,12 +101,20 @@ const openModal = (e) => {
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
   document.body.insertBefore(reviewModal, document.body.firstChild);
 
+  const modal = document.getElementById("review-modal");
+
   const submitButton = document.getElementById("form-submit-button");
   submitButton.addEventListener('click', async (e) => {
     await submitForm(e, currentVendorInformation.name)
       .catch(e => {
         console.log(e)
       });
+      modal.remove();
+  });
+
+  const exitButton = document.getElementById("close-modal-x");
+  exitButton.addEventListener('click', async (e) => {
+      modal.remove();
   });
 }
 
@@ -133,6 +141,17 @@ const submitForm = (e, vendorName) => {
       if (response.ok) {
         resolve(response.json());
         console.log("response ok");
+
+        const c = vendorsInfo[vendorName];
+
+        vendorsInfo[vendorName] = {
+          name: vendorName,
+          rating: ((c.rating * c.numReviews) + rating) / (c.numReviews + 1),
+          numReviews: c.numReviews + 1,
+          badges: [],
+          reviews: [...c.reviews, {...request, createAt: new Date(Date.now())}]
+        }
+
       } else {
         reject(response.status);
       }
@@ -293,14 +312,11 @@ const putStarsOnVendorCards = () => {
 const createStars = (numOfStars) => {
   const stars = create("div", "starsContainer");
   for (let i = 0; i < Math.floor(numOfStars); i++) {
-    console.log("CREATE STAR");
-    console.log(i + ":" + numOfStars);
       const star = createChild(stars, "img", "star");
       star.src = chrome.runtime.getURL('full-star-48.png');
   }
   if (numOfStars % 1 >= 0.5) {
     const halfStar = createChild(stars, "img", "star");
-    console.log("CREATE HALF STAR");
     halfStar.src = chrome.runtime.getURL('half-star-48.png');
   }
   return stars
