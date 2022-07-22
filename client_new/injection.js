@@ -67,7 +67,7 @@ const openModal = (e) => {
     badgeObjects.push({text: badge, amount: 0});
   }
   const reviewFormVars = {
-    badges: createBadgesFromList(badgeObjects).outerHTML,
+    badges: createCheckboxBadgesFromList(badgeObjects).outerHTML,
   }
   
   const vars = {
@@ -83,15 +83,19 @@ const openModal = (e) => {
   reviewModal.innerHTML = parseHTML(modalHTMLTemplate, vars);
   document.body.insertBefore(reviewModal, document.body.firstChild);
 
-  const submitButton = getID("form-submit-button");
+  const submitButton = document.getElementById("form-submit-button");
   submitButton.addEventListener('click', async (e) => {
-    await submitForm(currentVendorInformation.name);
-  })
+    await submitForm(e, currentVendorInformation.name)
+      .catch(e => {
+        console.log(e)
+      });
+  });
 }
 
-const submitForm = (vendorName) => {a
-  const rating = getID("starSlider").value;
-  const comment = getID("comment").value;
+const submitForm = (e, vendorName) => {
+  e.preventDefault();
+  const rating = document.getElementById("starSlider").value;
+  const comment = document.getElementById("comment").value;
 
   const request = {
     name: vendorName,
@@ -102,15 +106,16 @@ const submitForm = (vendorName) => {a
   console.log(request);
 
   return new Promise((resolve, reject) => {
-    const response = fetch("http://localhost:8081/review" + encodeURIComponent(name), {
-      method: 'GET',
+    const response = fetch("http://localhost:8081/review", {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      // body: JSON.stringify("")
+      body: request
     }).then(response => {
       if (response.ok) {
         resolve(response.json());
+        console.log("response ok");
       } else {
         reject(response.status);
       }
@@ -122,12 +127,14 @@ const submitForm = (vendorName) => {a
 
 const getCheckedBadges = () => {
   var checkedBadges = []
-  const badges = getClass("checkbox-badge");
-  for (badge in badges) {
+  const badges = document.getElementsByClassName("checkbox-badge");
+  for (var i = 0; i < badges.length; i++) {
+    const badge = badges.item(i);
     if (badge.checked) {
       checkedBadges.push(badge.name);
     }
   }
+  return checkedBadges;
 }
 
 /**
@@ -192,7 +199,7 @@ const getVendor = (name) => {
 }
 
 const getVendorDivsWithNames = () => {
-  const vendors = getClass("myfooda-event__meta");
+  const vendors = document.getElementsByClassName("myfooda-event__meta");
   const vendorDivsWithNames = [];
 
   for (const vendor of vendors) {
@@ -291,14 +298,6 @@ const createChild = (parent, type, className) => {
   return elem;
 }
 
-const getID = (id) => {
-  return document.getElementById(id);
-}
-
-const getClass = (className) => {
-  return document.getElementsByClassName(className);
-}
-
 const createBadge = (parent, title, count) => {
   var badgeClassName;
   if (goodBadges.has(title)) {
@@ -315,13 +314,15 @@ const createBadge = (parent, title, count) => {
 }
 
 const createCheckboxBadge = (parent, title) => {
-  const newBadge = createChild(parent, "input", "checkbox-badge");
-  newBadge.type = "checkbox";
-  newBadge.id = title;
-  newBadge.name = title;
-  const label = createChild(parent, "label", "badge checkbox-badge-label text-bg-light");
-  label.for = title;
-  return newBadge;
+  const checkbox = createChild(parent, "input", "checkbox-badge");
+  checkbox.type = "checkbox";
+  checkbox.id = title;
+  checkbox.name = title;
+  const label = createChild(parent, "label", "checkbox-badge-label");
+  label.setAttribute("for", title);
+  const badge = createChild(label, "div", "badge text-bg-light");
+  badge.appendChild(document.createTextNode(title));
+  return checkbox;
 }
 
 const parseHTML = (string, values) => string.replace(/{(.*?)}/g, (match, offset) => values[offset]);
