@@ -87,13 +87,13 @@ const openModal = (e) => {
   }
   const reviewFormVars = {
     badges: createCheckboxBadgesFromList(badgeObjects).outerHTML,
-    stars: createStars(1).outerHTML
+    stars: createStars(1, false).outerHTML
   }
   
   const vars = {
     vendor_name: sanitize(currentVendorInformation.name),
     rating: Math.round(currentVendorInformation.rating * 10) / 10,
-    stars: createStars(currentVendorInformation.rating).outerHTML,
+    stars: createStars(currentVendorInformation.rating, false).outerHTML,
     num_reviews: currentVendorInformation.numReviews + " reviews",
     badges: createBadgesFromList(currentVendorInformation.badges).outerHTML,
     comments: loadComments(),
@@ -318,7 +318,7 @@ const putStarsOnVendorCards = () => {
           badges: vendorDB.badges,
           reviews: vendorDB.reviews.sort((a, b) =>  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         }
-        const starsContainer = createStars(vendorDB.rating);
+        const starsContainer = createStars(vendorDB.rating, true);
         starsContainer.addEventListener('click', async (e) => {
           currentVendorInformation = vendorsInfo[name];
           openModal(e);
@@ -337,13 +337,15 @@ const putStarsOnVendorCards = () => {
  * @param {number} numOfStars The number of stars in container
  * @returns The div element with all the stars
  */
-const createStars = (numOfStars) => {
+const createStars = (numOfStars, forVendor) => {
   const stars = create("div", "starsContainer");
-  stars.style = `
-  position: absolute;
-  right: 5px;
-  bottom: 5px;
-  `;
+  if (forVendor) {
+    stars.style = `
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    `;
+  }
   for (let i = 0; i < Math.floor(numOfStars); i++) {
       const star = createChild(stars, "img", "star");
       star.src = chrome.runtime.getURL('full-star-48.png');
