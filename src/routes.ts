@@ -7,13 +7,13 @@ const router = express.Router();
 //usage: /vendor?name=<insert name here>
 router.get('/vendor', async (req, res) => {
     const vendorName = req.query.name?.toString();
+    console.log(vendorName);
     if (!vendorName){
         res.sendStatus(500);
         return;
     }
     try {
         const vendor = await getVendor(vendorName);
-        console.log("cope")
         const vendorJson = {
             name: vendor.name,
             rating: vendor.rating,
