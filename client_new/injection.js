@@ -49,7 +49,7 @@ const singleReviewHTMLTemplate = `
 <div class="receipt__custom">thumb down</div> */}
 
 let currentVendorInformation;
-const URL = "http://foodaplus.herokuapp.com/"
+const URL = "https://foodaplus.herokuapp.com/"
 
 /**
  * Creates a div for the review modal
