@@ -10,4 +10,4 @@ Go use Fooda! You'll see stars next to resturaunt names that you can click for m
 
 ## Note
 
-There is a code start sometimes and you may have to wait 30 seconds before the reviews/stars become visible.
+There is a cold start sometimes and you may have to wait 30 seconds before the reviews/stars become visible.
